@@ -53,8 +53,9 @@ bool is_graph_valid()
     return is_graph_connected() && are_degrees_correct();
 }
 
-void generate_graph()
+vector<vector<int>> generate_graph(int num_peers_l)
 {
+    num_peers = num_peers_l;
     do
     {
         vector<int> degrees;
@@ -81,25 +82,5 @@ void generate_graph()
             }
         }
     } while (!is_graph_valid());
-}
-
-int main()
-{
-    srand(time(0));
-
-    num_peers = 10;
-
-    generate_graph();
-
-    for (int i = 0; i < graph.size(); i++)
-    {
-        cout << "Peer " << i << ": ";
-        for (int neighbor : graph[i])
-        {
-            cout << neighbor << " ";
-        }
-        cout << endl;
-    }
-
-    return 0;
+    return graph;
 }
