@@ -69,21 +69,25 @@ public:
 
     treeNode(treeNode *parent_node, Block *blk)
     {
+        cout << "creating gensis block" << endl;
         this->depth = parent_node ? parent_node->depth + 1 : 0;
         this->parent_ptr = parent_node;
         this->block_id = blk->BlkID;
-
-        map<int, int> new_balances = parent_node->balances;
-        new_balances[blk->miner_id] += 50;
-
-        for (int txn_id : blk->txns)
+        cout << "smthg" << endl;
+        if (parent_node)
         {
-            Transaction *txn = globalTransactions[txn_id];
-            new_balances[txn->sender_id] -= txn->amount;
-            new_balances[txn->receiver_id] += txn->amount;
-        }
+            map<int, int> new_balances = parent_node->balances;
+            new_balances[blk->miner_id] += 50;
+            for (int txn_id : blk->txns)
+            {
+                Transaction *txn = globalTransactions[txn_id];
+                new_balances[txn->sender_id] -= txn->amount;
+                new_balances[txn->receiver_id] += txn->amount;
+            }
 
-        this->balances = new_balances;
+            this->balances = new_balances;
+        }
+        cout << "genesis block created" << endl;
     }
 };
 
@@ -117,13 +121,15 @@ public:
     {
         peerID = pID;
         // coinbase = false;
-        longestChain = 0; 
+        longestChain = 0;
         this->simulator = simulator;
 
-        Block* genesis_block = new Block (0, -1, {});
+        Block *genesis_block = new Block(0, -1, {});
         globalBlocks[genesis_block->BlkID] = genesis_block;
 
+        
         genesis_blk = new treeNode(nullptr, genesis_block);
+
         genesis_blk->depth = 0;
         genesis_blk->parent_ptr = nullptr;
         genesis_blk->block_id = 0;
@@ -169,12 +175,12 @@ public:
     int I;
     P2P(int np)
     {
-        cout<<"P2P constructor called"<<endl;
+        cout << "P2P constructor called" << endl;
         numPeers = np;
         max_txn = 0;
         max_block = 0;
         vector<vector<int>> graph = generate_graph(numPeers);
-        cout<<"Graph generated"<<endl;
+        cout << "Graph generated" << endl;
         for (int i = 0; i < numPeers; i++)
         {
             peers.push_back(Peer(i, this));
@@ -185,7 +191,7 @@ public:
         computeHashPower();
         assignPropDelay();
         assignLinkSpeed();
-        cout<<"Going out"<<endl;
+        cout << "Going out" << endl;
     } // default constructor
 
     P2P(int z0, int z1, int np, int I, int Ttx) : z0(z0), z1(z1), numPeers(np)
