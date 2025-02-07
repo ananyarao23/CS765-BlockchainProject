@@ -11,8 +11,6 @@ int num_txns = 0;
 int time_stamp = 0;
 
 
-
-
 void P2P::start()
 {
     for (int i = 0; i < num_peers; i++)
