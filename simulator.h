@@ -40,7 +40,7 @@ public:
 class Block
 {
 public:
-    int BlkID;
+    int BlkID;//check if receiving peer has already seen the block
     int miner_id;
     int parent_id;
     vector<int> txns;
@@ -126,9 +126,11 @@ public:
     void broadcastTransaction();
     void receiveTransaction(int);
     void generateBlock();
-    void receiveBlock();
+    void receiveBlock(int);
     bool verifyBlock(int);
     void broadcastBlock(int);
+    void processOrphanBlocks(Block &);
+    bool validateBlock(Block &, map<int, int> &);
 };
 
 void Peer::setHashPower(double x)

@@ -54,7 +54,7 @@ void P2P::start()
             }
             else
             {
-                // handle rcving block
+                peers[next_msg[3]].receiveBlock(next_msg[2]);
             }
         }
     }
