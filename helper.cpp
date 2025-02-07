@@ -8,7 +8,7 @@ int generateExponential(double Ttx)
     std::random_device rd;
     std::mt19937 gen(rd());
     std::exponential_distribution<double> dist(1.0 / Ttx); // lambda = 1 / mean
-    cout<<"exponential generated"<<endl;
+    // cout<<"exponential generated"<<endl;
     return (int)dist(gen);
 }
 
@@ -27,7 +27,7 @@ double sampleUniform(double a, double b)
 
 vector<int> randomIndices(int x, int n)
 {
-    cout << "Generating indices... "<<x<< endl;
+    // cout << "Generating indices... "<<x<< endl;
     
     if (x > n) {
         cerr << "Error: x cannot be greater than n!" << endl;

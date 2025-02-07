@@ -69,11 +69,9 @@ public:
 
     treeNode(treeNode *parent_node, Block *blk)
     {
-        cout << "creating gensis block" << endl;
         this->depth = parent_node ? parent_node->depth + 1 : 0;
         this->parent_ptr = parent_node;
         this->block_id = blk->BlkID;
-        cout << "smthg" << endl;
         if (parent_node)
         {
             map<int, int> new_balances = parent_node->balances;
@@ -87,7 +85,6 @@ public:
 
             this->balances = new_balances;
         }
-        cout << "genesis block created" << endl;
     }
 };
 
@@ -104,6 +101,8 @@ public:
     bool coinbase;
     int maxDepth;
     double hash_power;
+    int total_blocks;
+    int total_transactions;
     set<int> memPool;               // mempool stroes txn IDs
     set<int> blockSet;              // stores ids of blocks seen by peer
     set<int> leafBlocks;            // stores ids of leaf blocks
@@ -119,33 +118,13 @@ public:
 
     Peer(int pID, P2P *simulator)
     {
+        total_blocks = 0;
+        total_transactions = 0;
         peerID = pID;
         // coinbase = false;
         longestChain = 0;
         this->simulator = simulator;
 
-        Block *genesis_block = new Block(0, -1, {});
-        globalBlocks[genesis_block->BlkID] = genesis_block;
-
-        
-        genesis_blk = new treeNode(nullptr, genesis_block);
-
-        genesis_blk->depth = 0;
-        genesis_blk->parent_ptr = nullptr;
-        genesis_blk->block_id = 0;
-
-        // // Initialize balances for all peers
-        // for (int i = 0; i < simulator->numPeers; i++)
-        // {
-        //     genesis_blk->balances[i] = 0;
-        // }
-
-        // Store genesis block in blockTree
-        blockTree[0] = genesis_blk;
-
-        // Mark it as seen
-        blockSet.insert(0);
-        leafBlocks.insert(0);
     }
 
     void setHashPower(double);
@@ -170,11 +149,18 @@ public:
     vector<vector<double>> link_speed;
     vector<vector<double>> prop_delay;
     int numPeers;
+    int simTime;
     int max_txn, max_block;
     int Ttx;
     int I;
+    int total_blocks;
+    int total_transactions;
+    int forks;
     P2P(int np)
     {
+        total_blocks = 0;
+        total_transactions = 0;
+        forks = 0;
         cout << "P2P constructor called" << endl;
         numPeers = np;
         max_txn = 0;
