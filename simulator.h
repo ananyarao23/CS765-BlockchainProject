@@ -85,6 +85,45 @@ public:
     }
 };
 
+class P2P
+{
+public:
+    int z0, z1;
+    vector<Peer> peers;
+    vector<vector<double>> link_speed;
+    vector<vector<double>> prop_delay;
+    int numPeers;
+    int max_txn, max_block;
+    int Ttx;
+    int I;
+    P2P(); // default constructor
+    P2P(int z0, int z1, int np,int I,int Ttx) : z0(z0), z1(z1), numPeers(np)
+    {
+        max_txn = 0;
+        max_block = 0;
+        vector<vector<int>> graph = generate_graph(numPeers);
+        for (int i = 0; i < numPeers; i++)
+        {
+            peers.push_back(Peer(i));
+            peers[i].neighbours = graph[i];
+        }
+        assignSlowFast();
+        assignCPU();
+        computeHashPower();
+        assignPropDelay();
+        assignLinkSpeed();
+    }
+    void assignSlowFast();
+    void assignCPU();
+    void assignPropDelay();
+    void assignLinkSpeed();
+    void computeHashPower();
+    void start();
+    int calculateLatency(int, int, double); // (i,j,size of message)
+};
+
+
+
 
 class Peer : public P2P
 {
@@ -96,6 +135,7 @@ public:
     bool lowCPU;
     bool coinbase;
     int maxDepth;
+    double hash_power;
     set<int> memPool;               // mempool stroes txn IDs
     set<int> blockSet;              // stores ids of blocks seen by peer
     set<int> leafBlocks;            // stores ids of leaf blocks
@@ -106,12 +146,8 @@ public:
     
 
     // tree at each peer?
-
-    double hash_power;
-    bool lowCPU;
     vector<int> neighbours;
     // queue<int> transactionQueue;
-    queue<int> blockQueue;
 
     Peer(int pID)
     {
@@ -145,45 +181,6 @@ void Peer::setslow()
 {
     slow = true;
 }
-
-class P2P
-{
-
-
-public:
-int z0, z1;
-    vector<Peer> peers;
-    vector<vector<double>> link_speed;
-    vector<vector<double>> prop_delay;
-    int numPeers;
-    int max_txn, max_block;
-    int Ttx;
-    int I;
-    P2P(); // default constructor
-    P2P(int z0, int z1, int np,int I,int Ttx) : z0(z0), z1(z1), numPeers(np)
-    {
-        max_txn = 0;
-        max_block = 0;
-        vector<vector<int>> graph = generate_graph(numPeers);
-        for (int i = 0; i < numPeers; i++)
-        {
-            peers.push_back(Peer(i));
-            peers[i].neighbours = graph[i];
-        }
-        assignSlowFast();
-        assignCPU();
-        computeHashPower();
-        assignPropDelay();
-        assignLinkSpeed();
-    }
-    void assignSlowFast();
-    void assignCPU();
-    void assignPropDelay();
-    void assignLinkSpeed();
-    void computeHashPower();
-    void start();
-    int calculateLatency(int, int, double); // (i,j,size of message)
-};
 
 
 

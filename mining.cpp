@@ -1,11 +1,9 @@
 #include "simulator.h"
-#include <random>
-#include <ctime>
 #include <cstdlib>
 #include <thread>
 #include <chrono>
 
-// int I; // global I
+
 
 double calculateBlockSize(Block *blk)
 {
@@ -27,7 +25,7 @@ void Peer::generateBlock()
 
     globalBlocks[blk->BlkID] = blk;
 
-    int ts = generateExponential(I / hash_power);
+    int ts = generateExponential(I/ hash_power);
     blockQueue.push({curr_time + ts, blk->BlkID, peerID});
 }
 
