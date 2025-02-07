@@ -131,6 +131,7 @@ bool Peer::validateBlock(Block& block, map<int, int>& balances_temp){
             return false;
         }
     }
+    balances[block.miner_id] += 50;
     balances_temp = balances;    
     return true;
 }
