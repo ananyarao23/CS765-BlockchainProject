@@ -9,8 +9,7 @@ double calculateBlockSize(Block *blk)
 
 void Peer::generateBlock()
 {
-    total_blocks++;
-    simulator->total_blocks++;
+    
 
     int num_txns = 0;
     vector<int> txns;
@@ -28,16 +27,16 @@ void Peer::generateBlock()
             break;
     }
     Block *blk = new Block(peerID, longestChain, txns);
-    cout << "[BLOCK GENERATED]: Block ID = " << blk->BlkID << " Parent ID = " << longestChain << " Peer = " << peerID << endl;
+    // cout << "[BLOCK GENERATED]: Block ID = " << blk->BlkID << " Parent ID = " << longestChain << " Peer = " << peerID << endl;
     globalBlocks[blk->BlkID] = blk;
-    int ts = generateExponential(simulator->I / hash_power);
+    int ts = generateExponential(simulator->I*100 / hash_power);
     blockQueue.push({curr_time + ts, blk->BlkID, peerID});
     // cout << "block pushed in block queue" << endl;
 }
 
 void Peer::broadcastBlock(int blkid)
 {
-    cout << "Block broadcasted by peer " << peerID << endl;
+    // cout << "Block broadcasted by peer " << peerID << endl;
     double messagesize = calculateBlockSize(globalBlocks[blkid]);
     // remove txns from pool
     for (auto tid : globalBlocks[blkid]->txns)
@@ -47,6 +46,7 @@ void Peer::broadcastBlock(int blkid)
     for (auto receiver : neighbours)
     {
         int lt = simulator->calculateLatency(peerID, receiver, messagesize);
+        // cout<<"Latency between sender: "<<peerID<<" receiver: "<<receiver<<" is "<<lt<<endl;
         sendingQueue.push({curr_time + lt, 1, blkid, receiver});
     }
 }
@@ -55,7 +55,7 @@ void Peer::receiveBlock(int blkid)
 {
     if (globalBlocks.find(blkid) == globalBlocks.end())
     {
-        cout << "Block does not exist" << endl;
+        // cout << "Block does not exist" << endl;
         return; // Block ID not found
     }
     Block *block = globalBlocks[blkid];
@@ -70,14 +70,16 @@ void Peer::receiveBlock(int blkid)
             map<int, int> balances_temp;
             if (validateBlock(*block, balances_temp))
             {
+                total_blocks++;
+                simulator->total_blocks++;
                 treeNode *parentNode = blockTree[block->parent_id];
                 treeNode *child = new treeNode(parentNode, block);
-                cout << "Balance in block:" << block->BlkID << endl;
-                for (int i = 0; i < simulator->numPeers; i++)
-                {
-                    cout << balances_temp[i] << " ";
-                }
-                cout << endl;
+                // cout << "Balance in block:" << block->BlkID << endl;
+                // for (int i = 0; i < simulator->numPeers; i++)
+                // {
+                //     cout << balances_temp[i] << " ";
+                // }
+                // cout << endl;
                 child->balances = balances_temp;
                 blockTree[block->BlkID] = child;
 
@@ -88,7 +90,7 @@ void Peer::receiveBlock(int blkid)
                 {
                     maxDepth = child->depth;
                     longestChain = blkid;
-                    cout << "Updated longest chain with leaf as" << longestChain << endl;
+                    // cout << "Updated longest chain with leaf as" << longestChain << endl;
 
                     for (int txn : block->txns)
                     {
@@ -97,7 +99,7 @@ void Peer::receiveBlock(int blkid)
                 }
                 else
                 {
-                    cout << "Not a part of longest chain: Fork created" << endl;
+                    // cout << "Not a part of longest chain: Fork created" << endl;
                     simulator->forks++;
                 }
 
@@ -108,7 +110,7 @@ void Peer::receiveBlock(int blkid)
         }
         else
         {
-            cout << "Block " << blkid << " is an orphan" << endl;
+            // cout << "Block " << blkid << " is an orphan" << endl;
             orphanBlocks.insert(blkid);
         }
     }
@@ -128,11 +130,11 @@ void Peer::processOrphanBlocks(Block &block)
             {
                 treeNode *parentNode = blockTree[block.BlkID];
                 treeNode *orphanChild = new treeNode(parentNode, globalBlocks[orphan]);
-                for (int i = 0; i < simulator->numPeers; i++)
-                {
-                    cout << balances_temp[i] << " ";
-                }
-                cout << endl;
+                // for (int i = 0; i < simulator->numPeers; i++)
+                // {
+                //     cout << balances_temp[i] << " ";
+                // }
+                // cout << endl;
                 orphanChild->balances = balances_temp;
                 leafBlocks.erase(block.BlkID);
                 leafBlocks.insert(orphan);
@@ -158,6 +160,8 @@ void Peer::processOrphanBlocks(Block &block)
     for (int orphan : toRemove)
     {
         orphanBlocks.erase(orphan);
+        total_blocks++;
+        simulator->total_blocks++;
     }
 }
 
@@ -182,7 +186,7 @@ bool Peer::validateBlock(Block &block, map<int, int> &balances_temp)
     balances[block.miner_id] += 50;
     balances_temp = balances;
 
-    cout << "moni moni " << balances_temp[block.miner_id] << " " << peerID << " " << block.miner_id << endl;
-    cout << "Block validated" << endl;
+    // cout << "moni moni " << balances_temp[block.miner_id] << " " << peerID << " " << block.miner_id << endl;
+    // cout << "Block validated" << endl;
     return true;
 }

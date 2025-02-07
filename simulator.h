@@ -13,12 +13,18 @@
 #include "helper.h"
 using namespace std;
 
+struct Compare {
+    bool operator()(const vector<int>& a, const vector<int>& b) {
+        return a > b; // Min-heap: smallest element first (lexicographical order)
+    }
+};
+
 extern int txnIDctr;
 extern int blkIDctr;
 extern int curr_time;
-extern priority_queue<vector<int>> sendingQueue;     // {timestamp, t(0)/b(1), ID, rcv}
-extern priority_queue<vector<int>> transactionQueue; // {timestamp, snd}
-extern priority_queue<vector<int>> blockQueue;       // {timestamp, blkID, snd}
+extern priority_queue<vector<int>, vector<vector<int>>, Compare> sendingQueue;     // {timestamp, t(0)/b(1), ID, rcv}
+extern priority_queue<vector<int>, vector<vector<int>>, Compare> transactionQueue;
+extern priority_queue<vector<int>, vector<vector<int>>, Compare> blockQueue;
 
 class Transaction
 {

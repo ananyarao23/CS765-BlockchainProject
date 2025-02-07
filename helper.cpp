@@ -1,4 +1,4 @@
-# include "helper.h"
+#include "helper.h"
 #include <algorithm>
 
 using namespace std;
@@ -28,8 +28,9 @@ double sampleUniform(double a, double b)
 vector<int> randomIndices(int x, int n)
 {
     // cout << "Generating indices... "<<x<< endl;
-    
-    if (x > n) {
+
+    if (x > n)
+    {
         cerr << "Error: x cannot be greater than n!" << endl;
         return {};
     }
@@ -38,7 +39,8 @@ vector<int> randomIndices(int x, int n)
     static mt19937 gen(rd());
 
     vector<int> allIndices(n);
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i)
+    {
         allIndices[i] = i;
     }
 
@@ -46,7 +48,8 @@ vector<int> randomIndices(int x, int n)
 
     vector<int> indices(allIndices.begin(), allIndices.begin() + x);
 
-    for (int idx : indices) {
+    for (int idx : indices)
+    {
         cout << idx << " ";
     }
     cout << endl;
@@ -62,7 +65,6 @@ int generate_random_number(int lower_bound, int upper_bound)
 
 vector<vector<int>> graph;
 int num_peers = 10;
-
 
 bool is_graph_connected()
 {
@@ -123,7 +125,9 @@ vector<vector<int>> generate_graph(int num_peers_l)
         vector<int> degrees;
         for (int i = 0; i < num_peers; ++i)
         {
+            // cout << "grape" << endl;
             degrees.push_back(generate_random_number(3, 6));
+            // cout << "fanta" << endl;
         }
         graph = {};
         for (int i = 0; i < num_peers; i++)
