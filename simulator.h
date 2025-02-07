@@ -17,8 +17,6 @@ int curr_time;
 priority_queue<vector<int>> sendingQueue;             // {timestamp, t(0)/b(1), ID, rcv}
 priority_queue<vector<int>> transactionQueue;      // {timestamp, snd}
 priority_queue<vector<int>> blockQueue;               // {timestamp, blkID, snd}
-unordered_map<int, Block *> globalBlocks;             // maps block id to block
-unordered_map<int, Transaction *> globalTransactions; // maps transaction id to transaction - populate later on ie when txn is popped from queue
 
 class Transaction
 {
@@ -56,6 +54,10 @@ public:
     }
 };
 
+unordered_map<int, Block *> globalBlocks;             // maps block id to block
+unordered_map<int, Transaction *> globalTransactions; // maps transaction id to transaction - populate later on ie when txn is popped from queue
+
+
 class treeNode // for the nodes of the tree stored by each peer
 {
 public:
@@ -70,7 +72,6 @@ public:
         this->parent_ptr = parent_node;
         this->block_id = blk->BlkID;
 
-        Block *blk = globalBlocks[block_id];
         map<int, int> new_balances = parent_node->balances;
         new_balances[blk->miner_id] += 50;
 
@@ -84,6 +85,8 @@ public:
         this->balances = new_balances;
     }
 };
+
+class Peer;
 
 class P2P
 {
@@ -192,6 +195,7 @@ void P2P::assignSlowFast()
     vector<int> indices = randomIndices(num, numPeers);
     for (int i : indices)
     {
+        cout<<"==== "<<i<<endl;
         peers[i].setslow();
     }
 }

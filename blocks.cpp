@@ -96,7 +96,7 @@ void Peer::processOrphanBlocks(Block& block) {
         if (blockTree[orphan]->parent_ptr->block_id == block.BlkID) {
             processedAnyOrphan = true;
             map<int, int> balances_temp;
-            if (validateBlock(globalBlocks[blockTree[orphan]->block_id], balances_temp)) {
+            if (validateBlock(*globalBlocks[blockTree[orphan]->block_id], balances_temp)) {
                 treeNode* parentNode = blockTree[block.BlkID];
                 treeNode* orphanChild = new treeNode(parentNode, globalBlocks[blockTree[orphan]->block_id]);
                 orphanChild->balances = blockTree[orphan]->balances;
@@ -106,7 +106,7 @@ void Peer::processOrphanBlocks(Block& block) {
                 orphanBlocks.erase(orphan);
 
                 // Recursively process any orphan blocks that are now children of the un-orphaned block
-                processOrphanBlocks(globalBlocks[blockTree[orphan]->block_id]);
+                processOrphanBlocks(*globalBlocks[blockTree[orphan]->block_id]);
             }
         }
     }
