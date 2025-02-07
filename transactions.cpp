@@ -15,7 +15,7 @@ void Peer ::generateTransaction()
 void Peer ::broadcastTransaction()
 {
     // coordinate with treenodebalances
-    int balance = ;
+    int balance = blockTree[peers[peerID].longestChain]->balances[peerID];
     srand(time(0));
     int amt = (rand() % balance) + 1;
     int rcv = (rand() % num_peers);
