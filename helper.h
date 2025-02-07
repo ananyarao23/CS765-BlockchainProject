@@ -1,40 +1,18 @@
+#ifndef HELPER_H
+#define HELPER_H
+#include <iostream>
+#include <queue>
 #include <random>
 using namespace std;
 
-int generateExponential(double Ttx)
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::exponential_distribution<double> dist(1.0 / Ttx); // lambda = 1 / mean
+int generateExponential(double Ttx);
 
-    return (int)dist(gen);
-}
+double sampleUniform(double a, double b);
 
-double sampleUniform(double a, double b)
-{
-    // Create a random device and generator
-    std::random_device rd;
-    std::mt19937 gen(rd()); // Mersenne Twister RNG
+vector<int> randomIndices(int x, int n);
 
-    // Define the uniform distribution in range [a, b]
-    std::uniform_real_distribution<double> dist(a, b);
+int generate_random_number(int lower_bound, int upper_bound);
 
-    // Generate and return a random sample
-    return dist(gen);
-}
+vector<vector<int>> generate_graph(int num_peers_l);
 
-
-vector<int> randomIndices(int x, int n)
-{
-    static random_device rd;
-    static mt19937 gen(rd());
-    uniform_int_distribution<int> dist(0, n - 1);
-
-    vector<int> indices;
-    for (int i = 0; i < x; ++i)
-    {
-        indices.push_back(dist(gen));
-    }
-
-    return indices;
-}
+#endif

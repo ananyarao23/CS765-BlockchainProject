@@ -1,9 +1,4 @@
 #include "simulator.h"
-#include <cstdlib>
-#include <thread>
-#include <chrono>
-
-
 
 double calculateBlockSize(Block *blk)
 {
@@ -12,11 +7,17 @@ double calculateBlockSize(Block *blk)
 
 void Peer::generateBlock()
 {
+    if (memPool.empty()) 
+    {
+        cout<<"Empty mempool hah"<<endl;
+        return;
+    }
     int num_txns = 0;
     vector<int> txns;
     for (auto e : memPool)
     {
         txns.push_back(e);
+        cout<<"txn pushed in mempool"<<endl;
         num_txns++;
         if (num_txns > 999)
             break;
@@ -25,8 +26,9 @@ void Peer::generateBlock()
 
     globalBlocks[blk->BlkID] = blk;
 
-    int ts = generateExponential(I/ hash_power);
+    int ts = generateExponential(simulator->I/ hash_power);
     blockQueue.push({curr_time + ts, blk->BlkID, peerID});
+    cout << "block pushed in block queue" << endl;
 }
 
 void Peer::broadcastBlock(int blkid)
@@ -39,13 +41,16 @@ void Peer::broadcastBlock(int blkid)
     }
     for (auto receiver:neighbours)
     {
-        int lt = calculateLatency(peerID, receiver, messagesize);
+        int lt = simulator->calculateLatency(peerID, receiver, messagesize);
         sendingQueue.push({curr_time + lt, 1, blkid, receiver});
     }
 }
 
 void Peer::receiveBlock(int blkid)
 {
+    if (globalBlocks.find(blkid) == globalBlocks.end()) {
+        return;  // Block ID not found
+    }
     Block *block = globalBlocks[blkid];
     //check if receiving peer has already seen the block
     if (blockSet.find(blkid) == blockSet.end())
@@ -76,8 +81,10 @@ void Peer::receiveBlock(int blkid)
                         memPool.erase(txn);
                     }
                 }
-                processOrphanBlocks(*block);
                 broadcastBlock(block->BlkID);
+                generateBlock();
+                processOrphanBlocks(*block);
+                
             }
         }
         else
@@ -88,31 +95,40 @@ void Peer::receiveBlock(int blkid)
 }
 
 void Peer::processOrphanBlocks(Block& block) {
-    // Flag to track if any orphan blocks were processed
-    bool processedAnyOrphan = false;
+    vector<int> toRemove;
 
     // Process the orphaned blocks
     for (int orphan : orphanBlocks) {
-        if (blockTree[orphan]->parent_ptr->block_id == block.BlkID) {
-            processedAnyOrphan = true;
+        if (globalBlocks[orphan]->parent_id == block.BlkID) {
             map<int, int> balances_temp;
-            if (validateBlock(*globalBlocks[blockTree[orphan]->block_id], balances_temp)) {
+            if (validateBlock(*globalBlocks[orphan], balances_temp)) {
                 treeNode* parentNode = blockTree[block.BlkID];
-                treeNode* orphanChild = new treeNode(parentNode, globalBlocks[blockTree[orphan]->block_id]);
-                orphanChild->balances = blockTree[orphan]->balances;
+                treeNode* orphanChild = new treeNode(parentNode, globalBlocks[orphan]);
+                orphanChild->balances = balances_temp;
                 blockTree[orphan] = orphanChild;
-                leafBlocks.erase(blockTree[orphan]->parent_ptr->block_id);
+                leafBlocks.erase(block.BlkID);
                 leafBlocks.insert(orphan);
-                orphanBlocks.erase(orphan);
+                if (orphanChild->depth > maxDepth)
+                {
+                    maxDepth = orphanChild->depth;
+                    longestChain = orphan;
+
+                    for (int txn : globalBlocks[orphan]->txns)
+                    {
+                        memPool.erase(txn);
+                    }
+                }
+                broadcastBlock(orphan);
+                generateBlock();
+                toRemove.push_back(orphan);
 
                 // Recursively process any orphan blocks that are now children of the un-orphaned block
-                processOrphanBlocks(*globalBlocks[blockTree[orphan]->block_id]);
+                processOrphanBlocks(*globalBlocks[orphan]);
             }
         }
     }
-
-    if (!processedAnyOrphan) {
-        return;
+    for (int orphan : toRemove) {
+        orphanBlocks.erase(orphan);
     }
 }
 

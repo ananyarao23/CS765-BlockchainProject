@@ -1,31 +1,263 @@
 #include "simulator.h"
-#include <random>
-#include <ctime>
-#include <cstdlib>
-#include <thread>
-#include <chrono>
 
 using namespace std;
 
 int num_txns = 0;
 int time_stamp = 0;
 
+int txnIDctr = 0;
+int blkIDctr = 0;
+int curr_time;
+priority_queue<vector<int>> sendingQueue;     // {timestamp, t(0)/b(1), ID, rcv}
+priority_queue<vector<int>> transactionQueue; // {timestamp, snd}
+priority_queue<vector<int>> blockQueue;
+unordered_map<int, Block *> globalBlocks;             // maps block id to block
+unordered_map<int, Transaction *> globalTransactions; // maps transaction id to transaction - populate later on ie when txn is popped from queue
+
+void Peer::setHashPower(double x)
+{
+    cout << "Setting hash power to " << x << endl;
+    hash_power = x;
+}
+
+void Peer::setlowCPU()
+{
+    cout << "Setting low CPU" << endl;
+    lowCPU = true;
+}
+
+void Peer::setslow()
+{
+    cout << "Setting slow" << endl;
+    slow = true;
+}
+
+void P2P::assignSlowFast()
+{
+    cout << "Assigning slow peers" << endl;
+    int num = z0 * numPeers / 100;
+    vector<int> indices = randomIndices(num, numPeers);
+    cout << "num: " << indices.size() << endl;
+    for (int i : indices)
+    {
+        cout << "==== " << i << endl;
+        peers[i].setslow();
+    }
+}
+
+void P2P::assignCPU()
+{
+    cout << "Assigning low CPU peers" << endl;
+    int num = z1 * numPeers / 100;
+    vector<int> indices = randomIndices(num, numPeers);
+    for (int i : indices)
+    {
+        cout << "Peer " << i << " is low CPU" << endl;
+        peers[i].setlowCPU();
+    }
+}
+
+void P2P::computeHashPower()
+{
+    double x;
+    double coefficient = 0;
+    for (int i = 0; i < numPeers; i++)
+    {
+        if (peers[i].lowCPU)
+            coefficient += 1;
+        else
+            coefficient += 10;
+    }
+    cout << "coefficient: " << coefficient << endl;
+    x = 1.0 / coefficient;
+    for (int i = 0; i < numPeers; i++)
+    {
+        if (peers[i].lowCPU)
+            peers[i].setHashPower(x);
+        else
+            peers[i].setHashPower(x * 10);
+    }
+}
+
+void P2P::assignPropDelay()
+{
+    cout << "Assigning propagation delay" << endl;
+    for (int i = 0; i < numPeers; i++)
+    {
+        prop_delay.push_back(vector<double>(numPeers));
+        for (int j = 0; j < numPeers; j++)
+        {
+            prop_delay[i][j] = sampleUniform(0.01, 0.5);
+        }
+    }
+}
+
+void P2P::assignLinkSpeed()
+{
+    cout << "Assigning link speed" << endl;
+    for (int i = 0; i < numPeers; i++)
+    {
+        link_speed.push_back(vector<double>(numPeers));
+        for (int j = 0; j < numPeers; j++)
+        {
+            link_speed[i][j] = peers[i].slow || peers[j].slow ? 5 : 100;
+        }
+    }
+}
+
+// ms in megabits
+int P2P::calculateLatency(int i, int j, double ms)
+{
+    cout << "Calculating latency between peer " << i << " and peer " << j << endl;
+    double p = prop_delay[i][j];
+    double c = link_speed[i][j];
+    int d = generateExponential(0.096 / c);
+    return p + d + ms / c;
+}
 
 void P2P::start()
 {
-    for (int i = 0; i < num_peers; i++)
+    cout << "Starting simulation" << endl;
+    for (int i = 0; i < numPeers; i++)
     {
         peers[i].generateBlock();
         peers[i].generateTransaction();
     }
 
-    while (1)
+    int numticks = 1000;
+
+    while (numticks--)
     {
-        auto next_blk = blockQueue.top();
-        auto next_txn = transactionQueue.top();
-        auto next_msg = sendingQueue.top();
-        if (next_blk[0] <= next_msg[0] && next_blk[0] <= next_txn[0])
+        cout << "Tick " << 1000 - numticks << endl;
+        bool blockReady = 0, txnReady = 0, msgReady = 0;
+        vector<int> next_blk, next_msg, next_txn;
+        if (!blockQueue.empty())
         {
+            blockReady = 1;
+            next_blk = blockQueue.top();
+        }
+        if (!transactionQueue.empty())
+        {
+            txnReady = 1;
+            next_txn = transactionQueue.top();
+        }
+        if (!sendingQueue.empty())
+        {
+            msgReady = 1;
+            next_msg = sendingQueue.top();
+        }
+        if (!blockReady && !txnReady && !msgReady) continue;
+        else if(blockReady && !txnReady && !msgReady)
+        {
+            cout << "Processing block" << endl;
+            blockQueue.pop();
+            int sender = next_blk[2];
+            int blkid = next_blk[1];
+            if (peers[sender].longestChain == globalBlocks[blkid]->parent_id)
+            {
+                peers[sender].broadcastBlock(blkid);
+                peers[sender].generateBlock();
+            }
+            else
+            {
+                delete globalBlocks[blkid];
+                globalBlocks[blkid] = NULL;
+            }
+        }
+        else if (!blockReady && txnReady && !msgReady)
+        {
+            cout << "Processing transaction" << endl;
+            transactionQueue.pop();
+            peers[next_txn[1]].broadcastTransaction();
+        }
+        else if (!blockReady && !txnReady && msgReady)
+        {
+            cout << "Processing message" << endl;
+            sendingQueue.pop();
+            if (next_msg[1] == 0)
+            {
+                peers[next_msg[3]].receiveTransaction(next_msg[2]);
+            }
+            else
+            {
+                peers[next_msg[3]].receiveBlock(next_msg[2]);
+            }
+        }
+        else if(blockReady && txnReady && !msgReady){
+            if(next_blk[0] <= next_txn[0]){
+                cout << "Processing block" << endl;
+                blockQueue.pop();
+                int sender = next_blk[2];
+                int blkid = next_blk[1];
+                if (peers[sender].longestChain == globalBlocks[blkid]->parent_id)
+                {
+                    peers[sender].broadcastBlock(blkid);
+                    peers[sender].generateBlock();
+                }
+                else
+                {
+                    delete globalBlocks[blkid];
+                    globalBlocks[blkid] = NULL;
+                }
+            }
+            else{
+                cout << "Processing transaction" << endl;
+                transactionQueue.pop();
+                peers[next_txn[1]].broadcastTransaction();
+            }
+        }
+        else if(blockReady && !txnReady && msgReady){
+            if(next_blk[0] <= next_msg[0]){
+                cout << "Processing block" << endl;
+                blockQueue.pop();
+                int sender = next_blk[2];
+                int blkid = next_blk[1];
+                if (peers[sender].longestChain == globalBlocks[blkid]->parent_id)
+                {
+                    peers[sender].broadcastBlock(blkid);
+                    peers[sender].generateBlock();
+                }
+                else
+                {
+                    delete globalBlocks[blkid];
+                    globalBlocks[blkid] = NULL;
+                }
+            }
+            else{
+                cout << "Processing message" << endl;
+                sendingQueue.pop();
+                if (next_msg[1] == 0)
+                {
+                    peers[next_msg[3]].receiveTransaction(next_msg[2]);
+                }
+                else
+                {
+                    peers[next_msg[3]].receiveBlock(next_msg[2]);
+                }
+            }
+        }
+        else if(!blockReady && txnReady && msgReady){
+            if(next_txn[0] <= next_msg[0]){
+                cout << "Processing transaction" << endl;
+                transactionQueue.pop();
+                peers[next_txn[1]].broadcastTransaction();
+            }
+            else{
+                cout << "Processing message" << endl;
+                sendingQueue.pop();
+                if (next_msg[1] == 0)
+                {
+                    peers[next_msg[3]].receiveTransaction(next_msg[2]);
+                }
+                else
+                {
+                    peers[next_msg[3]].receiveBlock(next_msg[2]);
+                }
+            }
+        }
+        else if (next_blk[0] <= next_msg[0] && next_blk[0] <= next_txn[0])
+        {
+            cout << "Processing block" << endl;
             blockQueue.pop();
             int sender = next_blk[2];
             int blkid = next_blk[1];
@@ -42,11 +274,13 @@ void P2P::start()
         }
         else if (next_txn[0] <= next_msg[0] && next_txn[0] <= next_blk[0])
         {
+            cout << "Processing transaction" << endl;
             transactionQueue.pop();
             peers[next_txn[1]].broadcastTransaction();
         }
         else
         {
+            cout << "Processing message" << endl;
             sendingQueue.pop();
             if (next_msg[1] == 0)
             {
@@ -60,15 +294,24 @@ void P2P::start()
     }
 }
 
-int main(int argc,char** argv){
-    if(argc != 6){
-        cout << "USAGE: ./{executable} {slow nodes} {slow CPU nodes} {number of peers} {simulation time} {I} {Ttx}" <<endl;
+int main(int argc, char **argv)
+{
+    if (argc != 7)
+    {
+        cout << "USAGE: ./{executable} {slow nodes} {slow CPU nodes} {number of peers} {simulation time} {I} {Ttx}" << endl;
+        return 1;
     }
-    P2P *simulator = new P2P();
+    
+    P2P *simulator = new P2P(stoi(argv[3]));
+    cout << "P2P constructed" << endl;
     simulator->z0 = stoi(argv[1]);
     simulator->z1 = stoi(argv[2]);
     simulator->numPeers = stoi(argv[3]);
     simulator->I = stoi(argv[5]);
     simulator->Ttx = stoi(argv[6]);
+    cout << "------------------Starting the simulation-----------------" << endl;
     simulator->start();
+    cout << "------------------Simulation ended-----------------" << endl;
+
+    return 0;
 }
