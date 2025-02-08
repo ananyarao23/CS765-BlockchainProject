@@ -1,5 +1,5 @@
-break simulator.cpp:131
-run 25 25 5 1000000 5 10
+break simulator.cpp:161
+run 25 25 5 1000000 100 10
 b generateTransaction()
 b broadcastBlock(int)
 b generateBlock()

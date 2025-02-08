@@ -5,6 +5,8 @@
 #include <random>
 using namespace std;
 
+// header file for all helper functions
+
 int generateExponential(double Ttx);
 
 double sampleUniform(double a, double b);
