@@ -39,7 +39,6 @@ void Peer::generateBlock()
     total_blocks_generated++;
     int ts = generateExponential(simulator->I*1000 / hash_power);
     blockQueue.push({curr_time + ts, blk->BlkID, peerID});
-    timeline[curr_time].push_back({blk->BlkID, blk->parent_id});
 }
 
 

@@ -267,6 +267,7 @@ void P2P::start()
                 total_blocks++;
                 peers[sender].total_blocks++;
                 peers[sender].addBlocktoTree(blkid);
+                peers[sender].timeline[curr_time].push_back({blkid, globalBlocks[blkid]->parent_id});
                 peers[sender].broadcastBlock(blkid);
                 peers[sender].generateBlock();
             }
