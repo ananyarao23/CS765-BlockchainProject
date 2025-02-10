@@ -91,6 +91,7 @@ void Peer::receiveBlock(int blkid)
             if (validateBlock(*block, balances_temp))
             {
                 total_blocks++;
+                valid_timeline[arrivalTime].push_back({blkid, block->parent_id});
                 // simulator->total_blocks++;
                 treeNode *parentNode = blockTree[block->parent_id];
                 treeNode *child = new treeNode(parentNode, block);
@@ -144,6 +145,7 @@ void Peer::processOrphanBlocks(Block &block)
             map<int, int> balances_temp;
             if (validateBlock(*globalBlocks[orphan], balances_temp))
             {
+                valid_timeline[curr_time].push_back({orphan, block.BlkID});
                 treeNode *parentNode = blockTree[block.BlkID];
                 treeNode *orphanChild = new treeNode(parentNode, globalBlocks[orphan]);
                 orphanChild->balances = balances_temp;

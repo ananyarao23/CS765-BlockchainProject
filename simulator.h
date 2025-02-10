@@ -104,7 +104,8 @@ public:
     treeNode *genesis_blk;                     // root of the tree
     map<int, treeNode *> blockTree;            // maps blockID to the corresponding treeNode
     set<int> orphanBlocks;                     // set of orphan blocks
-    map<int, vector<pair<int, int>>> timeline; // maps time to the block IDs that were received at that time
+    map<int, vector<pair<int, int>>> timeline; // maps time to the all block IDs that were received at that time
+    map<int, vector<pair<int, int>>> valid_timeline; // maps time to the all valid block IDs that were received at that time
     P2P *simulator;                            // pointer to global simulator
 
     Peer(int pID, P2P *simulator)

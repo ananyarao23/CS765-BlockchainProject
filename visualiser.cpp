@@ -12,6 +12,10 @@ void generateGraphvizDotFile(const std::string &inputFile, const std::string &ou
         return;
     }
 
+    // Ensure output directories exist
+    fs::create_directories(fs::path(outputDotFile).parent_path());
+    fs::create_directories(fs::path(outputPngFile).parent_path());
+
     std::ofstream outFile(outputDotFile);
     if (!outFile) {
         std::cerr << "Error opening output file: " << outputDotFile << std::endl;
@@ -57,15 +61,22 @@ void generateGraphvizDotFile(const std::string &inputFile, const std::string &ou
 }
 
 int main() {
-    std::string outputDir = "output"; // Folder where all txt files are stored
+    std::string outputDir = "output/valid_tree"; // Folder where all txt files are stored
 
     for (const auto &entry : fs::directory_iterator(outputDir)) {
         if (entry.path().extension() == ".txt" && entry.path().filename().string().find("block_times_") != std::string::npos) {
             std::string inputFile = entry.path().string();
             std::string peerID = entry.path().stem().string().substr(12); // Extract peer number
 
-            std::string outputDotFile = "output/dot/block_tree_" + peerID + ".dot";
-            std::string outputPngFile = "output/pic/block_tree_" + peerID + ".png";
+            std::string outputDotDir = "output/dot";
+            std::string outputGraphDir = "output/graphs";
+            
+            // Ensure output directories exist
+            fs::create_directories(outputDotDir);
+            fs::create_directories(outputGraphDir);
+
+            std::string outputDotFile = outputDotDir + "/block_tree_" + peerID + ".dot";
+            std::string outputPngFile = outputGraphDir + "/block_tree_" + peerID + ".png";
 
             generateGraphvizDotFile(inputFile, outputDotFile, outputPngFile);
         }

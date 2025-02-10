@@ -38,29 +38,56 @@ void Peer::setslow()
 /* For visualization and result compilation */
 void Peer::writeBlockTimesToFile()
 {
-    filesystem::create_directory("output");
-    ofstream outFile("output/block_times_" + to_string(peerID) + ".txt");
+    filesystem::create_directories("output/tree");  // Ensure directory exists
+    filesystem::create_directories("output/valid_tree");
 
-    if (!outFile.is_open())
+    // Writing to "output/tree/block_times_<peerID>.txt"
     {
-        cerr << "Error: Could not open file for writing\n";
-        return;
-    }
-
-    outFile << "BlockID : Time: Parent BlockID " << endl;
-    outFile << "---------------------------------" << endl;
-    outFile << "0 : 0 : -1" << endl;
-
-    for (const auto &entry : timeline)
-    {
-        for (const auto &id : entry.second)
+        ofstream outFile("output/tree/block_times_" + to_string(peerID) + ".txt");
+        if (!outFile.is_open())
         {
-            outFile << id.first << " : " << entry.first << " : " << id.second << "\n";
+            cerr << "Error: Could not open output/tree file for writing\n";
+            return;
         }
+
+        outFile << "BlockID : Time: Parent BlockID " << endl;
+        outFile << "---------------------------------" << endl;
+        outFile << "0 : 0 : -1" << endl;
+
+        for (const auto &entry : timeline)
+        {
+            for (const auto &id : entry.second)
+            {
+                outFile << id.first << " : " << entry.first << " : " << id.second << "\n";
+            }
+        }
+        outFile.close();
     }
 
-    outFile.close();
+    // Writing to "output/valid_tree/block_times_<peerID>.txt"
+    {
+        ofstream outFile("output/valid_tree/block_times_" + to_string(peerID) + ".txt");
+        if (!outFile.is_open())
+        {
+            cerr << "Error: Could not open output/valid_tree file for writing\n";
+            return;
+        }
+
+        outFile << "BlockID : Time: Parent BlockID " << endl;
+        outFile << "---------------------------------" << endl;
+        outFile << "0 : 0 : -1" << endl;
+
+        for (const auto &entry : valid_timeline)
+        {
+            for (const auto &id : entry.second)
+            {
+                outFile << id.first << " : " << entry.first << " : " << id.second << "\n";
+            }
+        }
+        outFile.close();
+    }
 }
+
 
 /* Takes as argument the global genesis block pointer and initializes the tree */
 void Peer::createTree(Block *genesis_block)
@@ -274,6 +301,7 @@ void P2P::start()
                 peers[sender].total_blocks++;
                 peers[sender].addBlocktoTree(blkid);
                 peers[sender].timeline[curr_time].push_back({blkid, globalBlocks[blkid]->parent_id});
+                peers[sender].valid_timeline[curr_time].push_back({blkid, globalBlocks[blkid]->parent_id});
                 peers[sender].broadcastBlock(blkid);
                 peers[sender].generateBlock();
             }
@@ -330,7 +358,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4]), stoi(argv[5]) / 1000, stoi(argv[6]));
+    P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4])*1000, stoi(argv[5]), stoi(argv[6])*1000);
     cout << "P2P constructed" << endl;
     cout << "------------------Starting the simulation-----------------" << endl;
     simulator->start();
