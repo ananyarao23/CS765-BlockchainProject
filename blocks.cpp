@@ -37,7 +37,12 @@ void Peer::generateBlock()
     Block *blk = new Block(peerID, longestChain, txns);
     globalBlocks[blk->BlkID] = blk;
     total_blocks_generated++;
-    int ts = generateExponential(simulator->I*1000 / hash_power);
+    int ts;
+    do
+    {
+        ts = generateExponential(simulator->I*1000 / hash_power);
+    } while (curr_time + ts < 0);
+    
     blockQueue.push({curr_time + ts, blk->BlkID, peerID});
 }
 

@@ -6,8 +6,13 @@ using namespace std;
 /*The peer samples an interarrival period and adds the generation to the event queue*/
 void Peer ::generateTransaction()
 {
-    int timestamp = curr_time + generateExponential(simulator->Ttx);
-    transactionQueue.push({timestamp, peerID});
+    int ts;
+    do
+    {
+        ts = generateExponential(simulator->I*1000 / hash_power);
+    } while (curr_time + ts < 0);
+
+    transactionQueue.push({curr_time + ts, peerID});
 }
 
 /* After an interarrival period, the node generating the
@@ -17,6 +22,7 @@ void Peer ::broadcastTransaction()
     int balance = blockTree[longestChain]->balances[peerID];
     if (balance == 0)
     {
+        failed_txns++;
         generateTransaction();
         return;
     }

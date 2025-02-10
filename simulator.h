@@ -23,7 +23,7 @@ struct Compare // for min priority queue implementation
 
 extern int txnIDctr; // for setting txn ID
 extern int blkIDctr; // for setting block ID
-extern int curr_time;
+extern long long int curr_time;
 extern priority_queue<vector<int>, vector<vector<int>>, Compare> sendingQueue;     // {timestamp, t(0)/b(1), ID, rcv}
 extern priority_queue<vector<int>, vector<vector<int>>, Compare> transactionQueue; // {timestamp, sender}
 extern priority_queue<vector<int>, vector<vector<int>>, Compare> blockQueue;       // {timestamp, block_ID, sender}
@@ -94,6 +94,7 @@ public:
     double total_blocks;
     double total_blocks_generated;
     int total_transactions;
+    int failed_txns;
     vector<int> neighbours;
     int longestChain;                          // block ID of leaf at end of longest chain
     set<int> memPool;                          // stores txn IDs
@@ -111,6 +112,7 @@ public:
         total_blocks = 0;
         total_blocks_generated = 0;
         total_transactions = 0;
+        failed_txns = 0;
         maxDepth = 0;
         peerID = pID;
         longestChain = 0;

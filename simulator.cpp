@@ -9,7 +9,7 @@ int time_stamp = 0;
 
 int txnIDctr = 0;  // for setting txn ID
 int blkIDctr = 1;  // for setting block ID
-int curr_time = 0; // time counter
+long long int curr_time = 0; // time counter
 priority_queue<vector<int>, vector<vector<int>>, Compare> sendingQueue;
 priority_queue<vector<int>, vector<vector<int>>, Compare> transactionQueue;
 priority_queue<vector<int>, vector<vector<int>>, Compare> blockQueue;
@@ -84,19 +84,23 @@ bool Peer::query(int txn_id)
     return true;
 }
 
-void Peer::treeAnalysis(){
-    map<int,bool> inBlockChain;
+void Peer::treeAnalysis()
+{
+    map<int, bool> inBlockChain;
     int blkid = longestChain;
-    while(blkid != 0){
+    while (blkid != 0)
+    {
         inBlockChain[blkid] = true;
         blkid = globalBlocks[blkid]->parent_id;
     }
     inBlockChain[0] = true;
 
     vector<int> branch_len;
-    for(auto leaf:leafBlocks){
+    for (auto leaf : leafBlocks)
+    {
         int len = 0;
-        while(!inBlockChain[leaf]){
+        while (!inBlockChain[leaf])
+        {
             len++;
             leaf = globalBlocks[leaf]->parent_id;
         }
@@ -104,19 +108,22 @@ void Peer::treeAnalysis(){
     }
 }
 
-int Peer::blocks_in_longest_chain() {
+int Peer::blocks_in_longest_chain()
+{
     int block_in_longest_chain;
- 
+
     // Traverse backwards to find which nodes contributed blocks to the longest chain
-    treeNode* currNode = blockTree[longestChain];
-    while (currNode != nullptr) {
+    treeNode *currNode = blockTree[longestChain];
+    while (currNode != nullptr)
+    {
         int bID = currNode->block_id;
-        if (globalBlocks[bID]->miner_id == peerID){
+        if (globalBlocks[bID]->miner_id == peerID)
+        {
             block_in_longest_chain++;
         }
         currNode = currNode->parent_ptr;
     }
-    
+
     return block_in_longest_chain;
 }
 
@@ -223,13 +230,11 @@ void Peer::addBlocktoTree(int blkid)
     leafBlocks.erase(block->parent_id);
     leafBlocks.insert(blkid);
 
-
     for (int txn : block->txns)
     {
         memPool.erase(txn);
     }
 }
-
 
 /* Starts the simulation */
 void P2P::start()
@@ -246,7 +251,8 @@ void P2P::start()
     // Discrete event simulator
     while (curr_time < simTime)
     {
-        if(curr_time % 10000000 == 0){
+        if (curr_time % 10000000 == 0)
+        {
             cout << "Tick: " << curr_time << endl;
         }
         vector<int> next_blk, next_msg, next_txn;
@@ -258,7 +264,7 @@ void P2P::start()
 
         while (!blockQueue.empty() && next_blk[0] == curr_time)
 
-        { // a block is ready to be broadcasted by its miner 
+        { // a block is ready to be broadcasted by its miner
             blockQueue.pop();
             int sender = next_blk[2];
             int blkid = next_blk[1];
@@ -324,7 +330,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4]), stoi(argv[5])/1000, stoi(argv[6]));
+    P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4]), stoi(argv[5]) / 1000, stoi(argv[6]));
     cout << "P2P constructed" << endl;
     cout << "------------------Starting the simulation-----------------" << endl;
     simulator->start();
@@ -337,16 +343,18 @@ int main(int argc, char **argv)
     {
         cout << "Peer ID: " << peer.peerID << " Longest Chain " << peer.maxDepth << endl;
         cout << "Peer ID: " << peer.peerID << "(" << peer.slow << "," << peer.lowCPU << ") Blocks in Tree: " << peer.total_blocks << " Transactions generated: " << peer.total_transactions << endl;
-        // cout << "Peer ID: " << peer.peerID << 
+        cout << "Failed transactions: " << peer.failed_txns << endl;
+        // cout << "Peer ID: " << peer.peerID <<
         // cout<<peer.slow<<"".total_blocks_generated/peer.total_blocks<<endl;
         peer.writeBlockTimesToFile();
     }
-    cout << "======================================================="<<endl;
-    cout << "Slow/Fast" << "\tLow/High(CPU)" << "\tRatio" <<endl;
-    
-    for(auto peer: simulator->peers){
-        cout << (peer.slow ? "Slow" : "High") << "\t" << (peer.lowCPU ? "Low" : "High") << "\t" << peer.total_blocks_generated/peer.total_blocks << endl;
+    cout << "=======================================================" << endl;
+    cout << "Slow/Fast" << "\tLow/High(CPU)" << "\tRatio" << endl;
+
+    for (auto peer : simulator->peers)
+    {
+        cout << (peer.slow ? "Slow" : "High") << "\t" << (peer.lowCPU ? "Low" : "High") << "\t" << peer.total_blocks_generated / peer.total_blocks << endl;
     }
-    cout << "======================================================="<<endl;
+    cout << "=======================================================" << endl;
     return 0;
 }
