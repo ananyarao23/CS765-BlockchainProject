@@ -87,12 +87,13 @@ void Peer::receiveBlock(int blkid)
             if (validateBlock(*block, balances_temp))
             {
                 total_blocks++;
-                simulator->total_blocks++;
+                // simulator->total_blocks++;
                 treeNode *parentNode = blockTree[block->parent_id];
                 treeNode *child = new treeNode(parentNode, block);
                 child->balances = balances_temp;
                 blockTree[block->BlkID] = child;
-
+                leafBlocks.erase(block->parent_id);
+                leafBlocks.insert(block->BlkID);
                 
                 if (child->depth > maxDepth)
                 {
@@ -142,6 +143,8 @@ void Peer::processOrphanBlocks(Block &block)
                 treeNode *parentNode = blockTree[block.BlkID];
                 treeNode *orphanChild = new treeNode(parentNode, globalBlocks[orphan]);
                 orphanChild->balances = balances_temp;
+                leafBlocks.erase(block.BlkID);
+                leafBlocks.insert(orphan);
                 if (orphanChild->depth > maxDepth)
                 {
                     maxDepth = orphanChild->depth;

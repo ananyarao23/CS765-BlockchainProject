@@ -20,8 +20,7 @@ void Peer ::broadcastTransaction()
         generateTransaction();
         return;
     }
-    total_transactions++;
-    simulator->total_transactions++;
+    // simulator->total_transactions++;
     srand(time(0));
     int amt = (rand() % balance) + 1;
     int rcv;
@@ -48,6 +47,7 @@ void Peer ::receiveTransaction(int txn_id)
     if (transactionSet.find(txn_id) == transactionSet.end())
     {
         memPool.insert(txn_id);
+        total_transactions++;
         for (auto p : neighbours)
         {
             if (p != globalTransactions[txn_id]->sender_id)

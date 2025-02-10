@@ -1,0 +1,311 @@
+49 6 12 15 19 1 45 28 42 22 5 8 23 7 38 44 4 41 24 33 43 40 20 10 11 
+25 34 30 47 38 32 37 45 21 44 35 26 27 6 31 40 43 3 16 5 24 39 23 22 17 
+P2P constructed
+------------------Starting the simulation-----------------
+Tick: 0
+Tick: 1000000
+Tick: 2000000
+Tick: 3000000
+Tick: 4000000
+Tick: 5000000
+Tick: 6000000
+Tick: 7000000
+Tick: 8000000
+Tick: 9000000
+Tick: 10000000
+Tick: 11000000
+Tick: 12000000
+Tick: 13000000
+Tick: 14000000
+Tick: 15000000
+Tick: 16000000
+Tick: 17000000
+Tick: 18000000
+Tick: 19000000
+Tick: 20000000
+Tick: 21000000
+Tick: 22000000
+Tick: 23000000
+Tick: 24000000
+Tick: 25000000
+Tick: 26000000
+Tick: 27000000
+Tick: 28000000
+Tick: 29000000
+Tick: 30000000
+Tick: 31000000
+Tick: 32000000
+Tick: 33000000
+Tick: 34000000
+Tick: 35000000
+Tick: 36000000
+Tick: 37000000
+Tick: 38000000
+Tick: 39000000
+Tick: 40000000
+Tick: 41000000
+Tick: 42000000
+Tick: 43000000
+Tick: 44000000
+Tick: 45000000
+Tick: 46000000
+Tick: 47000000
+Tick: 48000000
+Tick: 49000000
+Tick: 50000000
+Tick: 51000000
+Tick: 52000000
+Tick: 53000000
+Tick: 54000000
+Tick: 55000000
+Tick: 56000000
+Tick: 57000000
+Tick: 58000000
+Tick: 59000000
+Tick: 60000000
+Tick: 61000000
+Tick: 62000000
+Tick: 63000000
+Tick: 64000000
+Tick: 65000000
+Tick: 66000000
+Tick: 67000000
+Tick: 68000000
+Tick: 69000000
+Tick: 70000000
+Tick: 71000000
+Tick: 72000000
+Tick: 73000000
+Tick: 74000000
+Tick: 75000000
+Tick: 76000000
+Tick: 77000000
+Tick: 78000000
+Tick: 79000000
+Tick: 80000000
+Tick: 81000000
+Tick: 82000000
+Tick: 83000000
+Tick: 84000000
+Tick: 85000000
+Tick: 86000000
+Tick: 87000000
+Tick: 88000000
+Tick: 89000000
+Tick: 90000000
+Tick: 91000000
+Tick: 92000000
+Tick: 93000000
+Tick: 94000000
+Tick: 95000000
+Tick: 96000000
+Tick: 97000000
+Tick: 98000000
+Tick: 99000000
+Tick: 100000000
+Tick: 101000000
+Tick: 102000000
+Tick: 103000000
+Tick: 104000000
+Tick: 105000000
+Tick: 106000000
+Tick: 107000000
+Tick: 108000000
+Tick: 109000000
+Tick: 110000000
+Tick: 111000000
+Tick: 112000000
+Tick: 113000000
+Tick: 114000000
+Tick: 115000000
+Tick: 116000000
+Tick: 117000000
+Tick: 118000000
+Tick: 119000000
+Tick: 120000000
+Tick: 121000000
+Tick: 122000000
+Tick: 123000000
+Tick: 124000000
+Tick: 125000000
+Tick: 126000000
+Tick: 127000000
+Tick: 128000000
+Tick: 129000000
+Tick: 130000000
+Tick: 131000000
+Tick: 132000000
+Tick: 133000000
+Tick: 134000000
+Tick: 135000000
+Tick: 136000000
+Tick: 137000000
+Tick: 138000000
+Tick: 139000000
+Tick: 140000000
+Tick: 141000000
+Tick: 142000000
+Tick: 143000000
+Tick: 144000000
+Tick: 145000000
+Tick: 146000000
+Tick: 147000000
+Tick: 148000000
+Tick: 149000000
+------------------Simulation ended-----------------
+Total blocks generated: 53
+Total transactions generated: 69164
+Average forks: 2
+Peer ID: 0 Longest Chain 54
+Peer ID: 0(0,0) Blocks in Tree: 62 Transactions generated: 2417
+Peer ID: 1 Longest Chain 50
+Peer ID: 1(1,0) Blocks in Tree: 59 Transactions generated: 2092
+Peer ID: 2 Longest Chain 53
+Peer ID: 2(0,0) Blocks in Tree: 57 Transactions generated: 1675
+Peer ID: 3 Longest Chain 50
+Peer ID: 3(0,1) Blocks in Tree: 50 Transactions generated: 1502
+Peer ID: 4 Longest Chain 52
+Peer ID: 4(1,0) Blocks in Tree: 57 Transactions generated: 1126
+Peer ID: 5 Longest Chain 50
+Peer ID: 5(1,1) Blocks in Tree: 50 Transactions generated: 2223
+Peer ID: 6 Longest Chain 50
+Peer ID: 6(1,1) Blocks in Tree: 51 Transactions generated: 1894
+Peer ID: 7 Longest Chain 51
+Peer ID: 7(1,0) Blocks in Tree: 56 Transactions generated: 2338
+Peer ID: 8 Longest Chain 53
+Peer ID: 8(1,0) Blocks in Tree: 59 Transactions generated: 2121
+Peer ID: 9 Longest Chain 51
+Peer ID: 9(0,0) Blocks in Tree: 57 Transactions generated: 2394
+Peer ID: 10 Longest Chain 51
+Peer ID: 10(1,0) Blocks in Tree: 59 Transactions generated: 2112
+Peer ID: 11 Longest Chain 50
+Peer ID: 11(1,0) Blocks in Tree: 58 Transactions generated: 2420
+Peer ID: 12 Longest Chain 53
+Peer ID: 12(1,0) Blocks in Tree: 55 Transactions generated: 2342
+Peer ID: 13 Longest Chain 51
+Peer ID: 13(0,0) Blocks in Tree: 59 Transactions generated: 2512
+Peer ID: 14 Longest Chain 51
+Peer ID: 14(0,0) Blocks in Tree: 54 Transactions generated: 1103
+Peer ID: 15 Longest Chain 55
+Peer ID: 15(1,0) Blocks in Tree: 62 Transactions generated: 2292
+Peer ID: 16 Longest Chain 50
+Peer ID: 16(0,1) Blocks in Tree: 50 Transactions generated: 916
+Peer ID: 17 Longest Chain 50
+Peer ID: 17(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 18 Longest Chain 54
+Peer ID: 18(0,0) Blocks in Tree: 60 Transactions generated: 2157
+Peer ID: 19 Longest Chain 52
+Peer ID: 19(1,0) Blocks in Tree: 57 Transactions generated: 2437
+Peer ID: 20 Longest Chain 51
+Peer ID: 20(1,0) Blocks in Tree: 60 Transactions generated: 2303
+Peer ID: 21 Longest Chain 50
+Peer ID: 21(0,1) Blocks in Tree: 50 Transactions generated: 730
+Peer ID: 22 Longest Chain 50
+Peer ID: 22(1,1) Blocks in Tree: 50 Transactions generated: 1302
+Peer ID: 23 Longest Chain 50
+Peer ID: 23(1,1) Blocks in Tree: 50 Transactions generated: 327
+Peer ID: 24 Longest Chain 50
+Peer ID: 24(1,1) Blocks in Tree: 50 Transactions generated: 920
+Peer ID: 25 Longest Chain 50
+Peer ID: 25(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 26 Longest Chain 50
+Peer ID: 26(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 27 Longest Chain 50
+Peer ID: 27(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 28 Longest Chain 52
+Peer ID: 28(1,0) Blocks in Tree: 57 Transactions generated: 1926
+Peer ID: 29 Longest Chain 51
+Peer ID: 29(0,0) Blocks in Tree: 53 Transactions generated: 2169
+Peer ID: 30 Longest Chain 51
+Peer ID: 30(0,1) Blocks in Tree: 51 Transactions generated: 712
+Peer ID: 31 Longest Chain 50
+Peer ID: 31(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 32 Longest Chain 50
+Peer ID: 32(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 33 Longest Chain 52
+Peer ID: 33(1,0) Blocks in Tree: 57 Transactions generated: 2347
+Peer ID: 34 Longest Chain 50
+Peer ID: 34(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 35 Longest Chain 50
+Peer ID: 35(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 36 Longest Chain 53
+Peer ID: 36(0,0) Blocks in Tree: 60 Transactions generated: 2141
+Peer ID: 37 Longest Chain 50
+Peer ID: 37(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 38 Longest Chain 50
+Peer ID: 38(1,1) Blocks in Tree: 50 Transactions generated: 1520
+Peer ID: 39 Longest Chain 50
+Peer ID: 39(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 40 Longest Chain 50
+Peer ID: 40(1,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 41 Longest Chain 53
+Peer ID: 41(1,0) Blocks in Tree: 54 Transactions generated: 2267
+Peer ID: 42 Longest Chain 50
+Peer ID: 42(1,0) Blocks in Tree: 53 Transactions generated: 2311
+Peer ID: 43 Longest Chain 50
+Peer ID: 43(1,1) Blocks in Tree: 50 Transactions generated: 1691
+Peer ID: 44 Longest Chain 50
+Peer ID: 44(1,1) Blocks in Tree: 50 Transactions generated: 1378
+Peer ID: 45 Longest Chain 50
+Peer ID: 45(1,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 46 Longest Chain 51
+Peer ID: 46(0,0) Blocks in Tree: 60 Transactions generated: 2299
+Peer ID: 47 Longest Chain 50
+Peer ID: 47(0,1) Blocks in Tree: 50 Transactions generated: 0
+Peer ID: 48 Longest Chain 52
+Peer ID: 48(0,0) Blocks in Tree: 58 Transactions generated: 2528
+Peer ID: 49 Longest Chain 52
+Peer ID: 49(1,0) Blocks in Tree: 62 Transactions generated: 2220
+=======================================================
+Slow/Fast	Low/High(CPU)	Ratio
+High	High	0.887097
+Slow	High	0.864407
+High	High	0.947368
+High	Low	1.02
+Slow	High	0.929825
+Slow	Low	1.02
+Slow	Low	1
+Slow	High	0.928571
+Slow	High	0.915254
+High	High	0.912281
+Slow	High	0.881356
+Slow	High	0.87931
+Slow	High	0.981818
+High	High	0.881356
+High	High	0.962963
+Slow	High	0.903226
+High	Low	1.02
+High	Low	1.02
+High	High	0.916667
+Slow	High	0.929825
+Slow	High	0.866667
+High	Low	1.02
+Slow	Low	1.02
+Slow	Low	1.02
+Slow	Low	1.02
+High	Low	1.02
+High	Low	1.02
+High	Low	1.02
+Slow	High	0.929825
+High	High	0.981132
+High	Low	1.01961
+High	Low	1.02
+High	Low	1.02
+Slow	High	0.929825
+High	Low	1.02
+High	Low	1.02
+High	High	0.9
+High	Low	1.02
+Slow	Low	1.02
+High	Low	1.02
+Slow	Low	1.02
+Slow	High	1
+Slow	High	0.962264
+Slow	Low	1.02
+Slow	Low	1.02
+Slow	Low	1.02
+High	High	0.866667
+High	Low	1.02
+High	High	0.913793
+Slow	High	0.854839
+=======================================================

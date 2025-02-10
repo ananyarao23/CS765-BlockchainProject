@@ -91,13 +91,14 @@ public:
     bool lowCPU;
     int maxDepth;
     double hash_power;
-    int total_blocks;
-    int total_blocks_generated;
+    double total_blocks;
+    double total_blocks_generated;
     int total_transactions;
     vector<int> neighbours;
     int longestChain;                          // block ID of leaf at end of longest chain
     set<int> memPool;                          // stores txn IDs
     set<int> blockSet;                         // stores IDs of blocks seen by peer
+    set<int> leafBlocks;
     set<int> transactionSet;                   // stores IDs of transactions seen by peer
     treeNode *genesis_blk;                     // root of the tree
     map<int, treeNode *> blockTree;            // maps blockID to the corresponding treeNode
@@ -108,6 +109,7 @@ public:
     Peer(int pID, P2P *simulator)
     {
         total_blocks = 0;
+        total_blocks_generated = 0;
         total_transactions = 0;
         maxDepth = 0;
         peerID = pID;
@@ -133,6 +135,8 @@ public:
     bool validateBlock(Block &, map<int, int> &);
     void writeBlockTimesToFile();
     void addBlocktoTree(int);
+    int blocks_in_longest_chain();
+    void treeAnalysis();
 };
 
 class P2P // simulator class
@@ -175,7 +179,6 @@ public:
     void computeHashPower();
     void start();
     int calculateLatency(int, int, double);
-    void compute_statistics();
 };
 
 #endif
