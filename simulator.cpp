@@ -137,7 +137,7 @@ void Peer::treeAnalysis()
 
 int Peer::blocks_in_longest_chain()
 {
-    int block_in_longest_chain;
+    int num_blocks = 0;
 
     // Traverse backwards to find which nodes contributed blocks to the longest chain
     treeNode *currNode = blockTree[longestChain];
@@ -146,12 +146,12 @@ int Peer::blocks_in_longest_chain()
         int bID = currNode->block_id;
         if (globalBlocks[bID]->miner_id == peerID)
         {
-            block_in_longest_chain++;
+            num_blocks++;
         }
         currNode = currNode->parent_ptr;
     }
 
-    return block_in_longest_chain;
+    return num_blocks;
 }
 
 /* Randomly sets a fraction of the P2P peers to be slow */
@@ -297,7 +297,6 @@ void P2P::start()
             int blkid = next_blk[1];
             if (peers[sender].longestChain == globalBlocks[blkid]->parent_id)
             {
-                total_blocks++;
                 peers[sender].total_blocks++;
                 peers[sender].addBlocktoTree(blkid);
                 peers[sender].timeline[curr_time].push_back({blkid, globalBlocks[blkid]->parent_id});
@@ -363,26 +362,13 @@ int main(int argc, char **argv)
     cout << "------------------Starting the simulation-----------------" << endl;
     simulator->start();
     cout << "------------------Simulation ended-----------------" << endl;
-    cout << "Total blocks generated: " << simulator->total_blocks << endl;
-    cout << "Total transactions generated: " << simulator->total_transactions << endl;
-    cout << "Average forks: " << simulator->forks / simulator->numPeers << endl;
 
+    cout << "Peer ID\tSlow/Fast\tLow/High(CPU)\tBlocks mined\tBlocks in Tree\tRatio\tLongest Chain\tTransactions"<<endl;
     for (auto peer : simulator->peers)
     {
-        cout << "Peer ID: " << peer.peerID << " Longest Chain " << peer.maxDepth << endl;
-        cout << "Peer ID: " << peer.peerID << "(" << peer.slow << "," << peer.lowCPU << ") Blocks in Tree: " << peer.total_blocks << " Transactions generated: " << peer.total_transactions << endl;
-        cout << "Failed transactions: " << peer.failed_txns << endl;
-        // cout << "Peer ID: " << peer.peerID <<
-        // cout<<peer.slow<<"".total_blocks_generated/peer.total_blocks<<endl;
+        cout<<peer.peerID<<"\t"<<(peer.slow ? "Slow" : "High")<<"\t"<<(peer.lowCPU ? "Low" : "High")<<"\t"<<peer.total_blocks<<"\t"<<peer.blocks_in_longest_chain()<<"\t"<<peer.blocks_in_longest_chain()/peer.total_blocks<<"\t"<<peer.maxDepth<<"\t"<<peer.total_transactions<<endl;
+
         peer.writeBlockTimesToFile();
     }
-    cout << "=======================================================" << endl;
-    cout << "Slow/Fast" << "\tLow/High(CPU)" << "\tRatio" << endl;
-
-    for (auto peer : simulator->peers)
-    {
-        cout << (peer.slow ? "Slow" : "High") << "\t" << (peer.lowCPU ? "Low" : "High") << "\t" << peer.total_blocks_generated / peer.total_blocks << endl;
-    }
-    cout << "=======================================================" << endl;
     return 0;
 }
