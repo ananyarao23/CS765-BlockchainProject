@@ -1,4 +1,4 @@
-CXX = g++
+CXX = g++ -w
 CXXFLAGS = -g -Wall -Wextra -std=c++17 -O2
 
 # Source files

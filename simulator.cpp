@@ -145,14 +145,11 @@ int Peer::blocks_in_longest_chain()
     while (currNode->block_id != 0)
     {
         int bID = currNode->block_id;
-        // cout << bID << " " << currNode->block_id << " peer:" << peerID<<endl;
-        // cout << (globalBlocks[bID] ? "Blocks exists" : "Doesn't exits")
         if (globalBlocks[bID]->miner_id == peerID)
         {
             num_blocks++;
         }
         currNode = currNode->parent_ptr;
-        // cout<< (currNode ? "Exists" : "Doesn't exist")<<endl;
     }
 
     return num_blocks;
@@ -282,10 +279,6 @@ void P2P::start()
     // Discrete event simulator
     while (curr_time < simTime)
     {
-        if (curr_time % 10000000 == 0)
-        {
-            cout << "Tick: " << curr_time << endl;
-        }
         vector<int> next_blk, next_msg, next_txn;
 
         if (!blockQueue.empty())
@@ -362,25 +355,42 @@ int main(int argc, char **argv)
     }
 
     P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4])*1000, stoi(argv[5]), stoi(argv[6])*1000);
-    cout << "P2P constructed" << endl;
-    cout << "------------------Starting the simulation-----------------" << endl;
+    cout << "-----------------------------------------Starting the simulation-----------------------------------------" << endl;
     simulator->start();
-    cout << "------------------Simulation ended-----------------" << endl;
 
-    cout << setw(10) << "Peer ID" << setw(10) << "Speed" << setw(15) << "CPU" << setw(15) << "Blocks in Tree" <<  setw(15) << "Blocks mined" << setw(10) << "Ratio" << setw(15) << "Longest Chain" << setw(15) << "Transactions" << endl;
+    cout << setw(7) << "Peer ID" << setw(7) << "Speed" << setw(7) << "CPU" << setw(32) << "Blocks owned in Longest Chain" <<  setw(15) << "Blocks mined" << setw(10) << "Ratio" << setw(25) << "Blocks in Longest Chain" << setw(25) << "Transactions generated" << endl;
+    cout << string(130, '-') << endl;
     for (auto peer : simulator->peers)
     {
-        cout << setw(10) << peer.peerID
-             << setw(10) << (peer.slow ? "Slow" : "Fast")
-             << setw(15) << (peer.lowCPU ? "Low" : "High")
-             << setw(15) << peer.blocks_in_longest_chain()
-             << setw(15) << peer.total_blocks
+        cout << setw(7) << peer.peerID
+             << setw(7) << (peer.slow ? "Slow" : "Fast")
+             << setw(7) << (peer.lowCPU ? "Low" : "High")
+             << setw(32) << peer.blocks_in_longest_chain()
+             << setw(15) << int(peer.total_blocks)
              << setw(10) << fixed << setprecision(2) << (peer.total_blocks > 0 ? static_cast<double>(peer.blocks_in_longest_chain()) / peer.total_blocks : 0)
-             << setw(15) << peer.maxDepth
-             << setw(15) << peer.total_transactions
+             << setw(25) << peer.maxDepth
+             << setw(25) << peer.total_transactions
              << endl;
 
         peer.writeBlockTimesToFile();
     }
+    cout << "------------------------------------------------Simulation ended------------------------------------------" << endl;
+
+    ofstream outFile("simulation_results.csv");
+    outFile << "PeerID,Speed,CPU,BlocksOwned,BlocksMined,Ratio,MaxDepth,TransactionsGenerated\n";
+    
+    for (auto peer : simulator->peers)
+    {
+        outFile << peer.peerID << ","
+                << (peer.slow ? "Slow" : "Fast") << ","
+                << (peer.lowCPU ? "Low" : "High") << ","
+                << peer.blocks_in_longest_chain() << ","
+                << peer.total_blocks << ","
+                << (peer.total_blocks > 0 ? static_cast<double>(peer.blocks_in_longest_chain()) / peer.total_blocks : 0) << ","
+                << peer.maxDepth << ","
+                << peer.total_transactions << "\n";
+    }
+    outFile.close();
+
     return 0;
 }

@@ -52,12 +52,6 @@ vector<int> randomIndices(int x, int n)
 
     vector<int> indices(allIndices.begin(), allIndices.begin() + x);
 
-    for (int idx : indices)
-    {
-        cout << idx << " ";
-    }
-    cout << endl;
-
     return indices;
 }
 
