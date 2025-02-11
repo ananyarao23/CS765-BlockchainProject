@@ -354,7 +354,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4])*1000, stoi(argv[5]), stoi(argv[6])*1000);
+    P2P *simulator = new P2P(stoi(argv[1]), stoi(argv[2]), stoi(argv[3]), stoi(argv[4])*1000, stoi(argv[5]), stof(argv[6])*1000);
     cout << "-----------------------------------------Starting the simulation-----------------------------------------" << endl;
     simulator->start();
 

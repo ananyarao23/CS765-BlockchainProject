@@ -9,7 +9,7 @@ void Peer ::generateTransaction()
     int ts;
     do
     {
-        ts = generateExponential(simulator->I*1000 / hash_power);
+        ts = generateExponential(simulator->Ttx);
     } while (curr_time + ts < 0);
 
     transactionQueue.push({curr_time + ts, peerID});
