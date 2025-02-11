@@ -92,7 +92,6 @@ public:
     int maxDepth;
     double hash_power;
     double total_blocks;
-    double total_blocks_generated;
     int total_transactions;
     int failed_txns;
     vector<int> neighbours;
@@ -111,7 +110,6 @@ public:
     Peer(int pID, P2P *simulator)
     {
         total_blocks = 0;
-        total_blocks_generated = 0;
         total_transactions = 0;
         failed_txns = 0;
         maxDepth = 0;
@@ -151,13 +149,11 @@ public:
     vector<vector<double>> link_speed; // link speeds of all peers
     vector<vector<double>> prop_delay; // prop delay of all peers
     int max_txn, max_block;
-    int total_blocks;
     int total_transactions;
     int forks;
 
     P2P(int z0, int z1, int np, int st, int I, int Ttx) : z0(z0), z1(z1), numPeers(np), I(I), Ttx(Ttx)
     {
-        total_blocks = 0;
         total_transactions = 0;
         forks = 0;
         max_txn = 0;

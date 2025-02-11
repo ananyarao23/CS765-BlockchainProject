@@ -36,7 +36,6 @@ void Peer::generateBlock()
     }
     Block *blk = new Block(peerID, longestChain, txns);
     globalBlocks[blk->BlkID] = blk;
-    total_blocks_generated++;
     int ts;
     do
     {
@@ -90,9 +89,7 @@ void Peer::receiveBlock(int blkid)
             map<int, int> balances_temp;
             if (validateBlock(*block, balances_temp))
             {
-                total_blocks++;
                 valid_timeline[arrivalTime].push_back({blkid, block->parent_id});
-                // simulator->total_blocks++;
                 treeNode *parentNode = blockTree[block->parent_id];
                 treeNode *child = new treeNode(parentNode, block);
                 child->balances = balances_temp;
@@ -172,8 +169,6 @@ void Peer::processOrphanBlocks(Block &block)
     for (int orphan : toRemove)
     {
         orphanBlocks.erase(orphan);
-        total_blocks++;
-        simulator->total_blocks++;
     }
 }
 
