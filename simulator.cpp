@@ -1,5 +1,6 @@
 #include "simulator.h"
 #include <fstream>
+#include <iomanip> 
 #include <filesystem>
 
 using namespace std;
@@ -141,14 +142,17 @@ int Peer::blocks_in_longest_chain()
 
     // Traverse backwards to find which nodes contributed blocks to the longest chain
     treeNode *currNode = blockTree[longestChain];
-    while (currNode != nullptr)
+    while (currNode->block_id != 0)
     {
         int bID = currNode->block_id;
+        // cout << bID << " " << currNode->block_id << " peer:" << peerID<<endl;
+        // cout << (globalBlocks[bID] ? "Blocks exists" : "Doesn't exits")
         if (globalBlocks[bID]->miner_id == peerID)
         {
             num_blocks++;
         }
         currNode = currNode->parent_ptr;
+        // cout<< (currNode ? "Exists" : "Doesn't exist")<<endl;
     }
 
     return num_blocks;
@@ -363,10 +367,18 @@ int main(int argc, char **argv)
     simulator->start();
     cout << "------------------Simulation ended-----------------" << endl;
 
-    cout << "Peer ID\tSlow/Fast\tLow/High(CPU)\tBlocks mined\tBlocks in Tree\tRatio\tLongest Chain\tTransactions"<<endl;
+    cout << setw(10) << "Peer ID" << setw(10) << "Speed" << setw(15) << "CPU" << setw(15) << "Blocks in Tree" <<  setw(15) << "Blocks mined" << setw(10) << "Ratio" << setw(15) << "Longest Chain" << setw(15) << "Transactions" << endl;
     for (auto peer : simulator->peers)
     {
-        cout<<peer.peerID<<"\t"<<(peer.slow ? "Slow" : "High")<<"\t"<<(peer.lowCPU ? "Low" : "High")<<"\t"<<peer.total_blocks<<"\t"<<peer.blocks_in_longest_chain()<<"\t"<<peer.blocks_in_longest_chain()/peer.total_blocks<<"\t"<<peer.maxDepth<<"\t"<<peer.total_transactions<<endl;
+        cout << setw(10) << peer.peerID
+             << setw(10) << (peer.slow ? "Slow" : "Fast")
+             << setw(15) << (peer.lowCPU ? "Low" : "High")
+             << setw(15) << peer.blocks_in_longest_chain()
+             << setw(15) << peer.total_blocks
+             << setw(10) << fixed << setprecision(2) << (peer.total_blocks > 0 ? static_cast<double>(peer.blocks_in_longest_chain()) / peer.total_blocks : 0)
+             << setw(15) << peer.maxDepth
+             << setw(15) << peer.total_transactions
+             << endl;
 
         peer.writeBlockTimesToFile();
     }
