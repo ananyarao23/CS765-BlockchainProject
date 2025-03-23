@@ -21,12 +21,16 @@ struct Compare // for min priority queue implementation
     }
 };
 
+struct Compare2 // for min priority queue implementation for pair<vector<int>, string>
+{
+    bool operator()(const pair<vector<int>, string> &a, const pair<vector<int>, string> &b)
+    {
+        return a.first > b.first;
+    }
+};
+
 extern int txnIDctr; // for setting txn ID
 extern int blkIDctr; // for setting block ID
-extern long long int curr_time;
-extern priority_queue<vector<int>, vector<vector<int>>, Compare> sendingQueue;     // {timestamp, t(0)/b(1), ID, rcv}
-extern priority_queue<vector<int>, vector<vector<int>>, Compare> transactionQueue; // {timestamp, sender}
-extern priority_queue<vector<int>, vector<vector<int>>, Compare> blockQueue;       // {timestamp, block_ID, sender}
 
 class Transaction
 {
@@ -51,9 +55,9 @@ public:
     int BlkID;
     int miner_id;
     int parent_id;
-    vector<int> txns;
+    vector<string> txns;
 
-    Block(int miner_id, int parent_id, vector<int> txns)
+    Block(int miner_id, int parent_id, vector<string> txns)
     {
         this->BlkID = blkIDctr++;
         this->miner_id = miner_id;
@@ -83,8 +87,8 @@ public:
 
 class P2P // simulator class
 {
-    public:
-    int I, Ttx, simTime; // simulation parameters
+public:
+    int I, Ttx, Tt; // simulation parameters
     int numPeers;
     vector<Peer> peers;                // all peers in the simulation
     vector<vector<double>> link_speed; // link speeds of all peers
@@ -92,28 +96,73 @@ class P2P // simulator class
     int max_txn, max_block;
     int total_transactions;
     int forks;
-    bool malicious;
-    Sim* sim;
-    P2P(int np, set<int> mal_idx)
+    Sim *sim;
+    priority_queue<pair<vector<int>, string>, vector<pair<vector<int>, string>>, Compare2> sendingQueue;     // {timestamp, t(0)/b(1)/h(2)/g(3), rcv_id}, msg
+    priority_queue<vector<int>, vector<vector<int>>, Compare> transactionQueue; // {timestamp, sender}
+    priority_queue<vector<int>, vector<vector<int>>, Compare> blockQueue;       // {timestamp, block_ID, sender}
+    priority_queue<vector<int>, vector<vector<int>>, Compare> timeoutQueue;      // {timestamp, waiting peer ID, hash}
+    priority_queue<pair<vector<int>, string>, vector<pair<vector<int>, string>>, Compare2> timeoutQueue;     // {timestamp, waiting peer ID, hash}
+
+    void assignSlowFast();
+    void assignCPU();
+    void assignPropDelay();
+    void assignLinkSpeed();
+    void computeHashPower();
+    void start();
+    void run(long long);
+    int calculateLatency(int, int, double);
+    
+};
+
+class Network : public P2P
+{
+public:
+int mined_length;
+    Network(int np)
     {
         total_transactions = 0;
         forks = 0;
         max_txn = 0;
         max_block = 0;
-        simTime = st;
+        // simTime = st;
+        sendingQueue = {};
+        transactionQueue = {};
+        blockQueue = {};
         vector<vector<int>> graph = generate_graph(np);
 
-        if (mal_idx.empty())
+
+        for (int i = 0; i < numPeers; i++)
         {
-            // honest node
-            malicious = false;
-            malicious_peers = {};
+            peers[i].neighbours = graph[i];
         }
-        else
-        {
-            malicious = true;
-            malicious_peers = mal_idx; // contains peerIDs of all mal peers
-        }
+
+        assignSlowFast();
+        assignCPU();
+        computeHashPower();
+        assignPropDelay();
+        assignLinkSpeed();
+    }
+};
+
+class OverlayNetwork : public P2P
+{
+public:
+    set<int> malicious_peers;
+    int mined_length;
+
+    OverlayNetwork(int np, set<int> mal_idx)
+    {
+        total_transactions = 0;
+        forks = 0;
+        max_txn = 0;
+        max_block = 0;
+        sendingQueue = {};
+        transactionQueue = {};
+        blockQueue = {};
+        
+        vector<vector<int>> graph = generate_graph(np);
+
+        malicious_peers = mal_idx; // contains peerIDs of all mal peers
 
         for (int i = 0; i < numPeers; i++)
         {
@@ -125,17 +174,6 @@ class P2P // simulator class
         assignPropDelay();
         assignLinkSpeed();
     }
-    void assignSlowFast();
-    void assignCPU();
-    void assignPropDelay();
-    void assignLinkSpeed();
-    void computeHashPower();
-    void start();
-    void run();
-    int calculateLatency(int, int, double);
-
-    private:
-    set<int> malicious_peers;
 };
 
 #endif

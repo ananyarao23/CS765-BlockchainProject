@@ -1,4 +1,4 @@
-#include "structure.h"
+#include "simulator.h"
 
 using namespace std;
 
@@ -7,7 +7,6 @@ double calculateBlockSize(Block *blk)
 {
     return (1 + blk->txns.size()) * 8.0;
 }
-
 
 
 /*
