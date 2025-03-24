@@ -40,7 +40,7 @@ class P2P // simulator class
 public:
     virtual ~P2P() = default;
     int I, Ttx, Tt, numPeers; // simulation parameters
-    vector<Peer> peers;                // all peers in the simulation
+    vector<Peer*> peers;                // all peers in the simulation
     vector<vector<double>> link_speed; // link speeds of all peers
     vector<vector<double>> prop_delay; // prop delay of all peers
     int max_txn, max_block;
@@ -69,8 +69,7 @@ class Network : public P2P
 {
 public:
     int mined_length;
-    vector<Peer*>& peers;
-    Network(int np, vector<Peer*>& sim_peers) : peers(sim_peers)
+    Network(int np)
     {
         total_transactions = 0;
         forks = 0;
@@ -79,21 +78,6 @@ public:
         sendingQueue = {};
         transactionQueue = {};
         blockQueue = {};
-        vector<int> indices;
-        cout<<"np:"<<np<<endl;
-        cout<<peers.size()<<endl;
-        for (int i = 0; i < np; i++)
-        {
-            indices.push_back(i);
-        }
-        vector<vector<int>> graph = generate_graph(np, indices);
-
-        for (int i = 0; i < numPeers; i++)
-        {
-            peers[i].neighbours = graph[i];
-        }
-
-        
     }
 
     ~Network() {}
@@ -122,26 +106,6 @@ public:
         blockQueue = {};
 
         ringmasterID = chooseRandomPeer(mal_idx);
-
-        vector<vector<int>> graph = generate_graph(np, mal_idx);
-        
-        cout<<"malpeers:";
-        for (auto i : mal_idx)
-        {
-            malicious_peers.insert(i);
-            cout<<i<<" ";
-        }
-        cout<<endl;
-
-        for (auto i : mal_idx)
-        {
-            cout<<"nde"<<i<<endl;
-
-            peers[i].malicious_neighbours = graph[i];
-            cout<<endl;
-
-        }
-        cout<<"XOOOOOOO"<<endl;
     }
 
     ~ OverlayNetwork() {}

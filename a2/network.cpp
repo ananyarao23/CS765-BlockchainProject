@@ -25,7 +25,7 @@ void P2P::assignLinkSpeed()
         link_speed.push_back(vector<double>(numPeers));
         for (int j = 0; j < numPeers; j++)
         {
-            link_speed[i][j] = peers[i].slow || peers[j].slow ? 5 : 100;
+            link_speed[i][j] = peers[i]->slow || peers[j]->slow ? 5 : 100;
         }
     }
 }
@@ -43,6 +43,7 @@ int P2P::calculateLatency(int i, int j, double ms)
 
 void Network::run(long long curr_time)
 {
+    // cout << "Running sim for honest network" << endl;
     vector<int> next_txn;
     pair<vector<int>, string> next_msg, next_tout, next_blk;
 
@@ -57,18 +58,18 @@ void Network::run(long long curr_time)
         blockQueue.pop();
         int sender = next_blk.first[1];
         string hash = next_blk.second;
-        if (peers[sender].longestChain == peers[sender].seen_blocks[hash]->parent_hash)
+        if (peers[sender]->longestChain == peers[sender]->seen_blocks[hash]->parent_hash)
         {
-            peers[sender].total_blocks++;
-            peers[sender].addBlocktoTree(hash);
-            peers[sender].timeline[curr_time].push_back({hash, peers[sender].seen_blocks[hash]->parent_hash});
-            peers[sender].valid_timeline[curr_time].push_back({hash, peers[sender].seen_blocks[hash]->parent_hash});
-            peers[sender].broadcastHash(hash);
-            peers[sender].generateBlock();
+            peers[sender]->total_blocks++;
+            peers[sender]->addBlocktoTree(hash);
+            peers[sender]->timeline[curr_time].push_back({hash, peers[sender]->seen_blocks[hash]->parent_hash});
+            peers[sender]->valid_timeline[curr_time].push_back({hash, peers[sender]->seen_blocks[hash]->parent_hash});
+            peers[sender]->broadcastHash(hash);
+            peers[sender]->generateBlock();
         }
         else
         {
-            peers[sender].seen_blocks.erase(hash);
+            peers[sender]->seen_blocks.erase(hash);
         }
         if (!blockQueue.empty())
             next_blk = blockQueue.top();
@@ -83,7 +84,7 @@ void Network::run(long long curr_time)
         // a transaction is ready to be broadcasted by its creator
         total_transactions++;
         transactionQueue.pop();
-        peers[next_txn[1]].broadcastTransaction();
+        peers[next_txn[1]]->broadcastTransaction();
         if (!transactionQueue.empty())
             next_txn = transactionQueue.top();
     }
@@ -97,19 +98,19 @@ void Network::run(long long curr_time)
         sendingQueue.pop();
         if (next_msg.first[1] == 0) // txn
         {
-            peers[next_msg.first[3]].receiveTransaction(next_msg.second);
+            peers[next_msg.first[3]]->receiveTransaction(next_msg.second);
         }
         else if (next_msg.first[1] == 1) // block
         {
-            peers[next_msg.first[3]].receiveBlock(next_msg.first[2], next_msg.second);
+            peers[next_msg.first[3]]->receiveBlock(next_msg.first[2], next_msg.second);
         }
         else if (next_msg.first[1] == 2) // hash
         {
-            peers[next_msg.first[3]].receiveHash(next_msg.second, next_msg.first[2]);
+            peers[next_msg.first[3]]->receiveHash(next_msg.second, next_msg.first[2]);
         }
         else if (next_msg.first[1] == 3) // get
         {
-            peers[next_msg.first[3]].receiveGetRequest(next_msg.second, next_msg.first[2]);
+            peers[next_msg.first[3]]->receiveGetRequest(next_msg.second, next_msg.first[2]);
         }
         if (!sendingQueue.empty())
         {
@@ -129,17 +130,17 @@ void Network::run(long long curr_time)
         int peerID = next_tout.first[1];
         string hash = next_tout.second;
         // it's possible that block has already been received, and data structures have been cleared
-        if (peers[peerID].pending_requests.find(hash) == peers[peerID].pending_requests.end())
+        if (peers[peerID]->pending_requests.find(hash) == peers[peerID]->pending_requests.end())
         {
             continue;
         }
-        peers[peerID].pending_requests[hash].pop();
-        if (!peers[peerID].pending_requests[hash].empty())
+        peers[peerID]->pending_requests[hash].pop();
+        if (!peers[peerID]->pending_requests[hash].empty())
         {
-            int sender_id = peers[peerID].pending_requests[hash].front();
-            peers[peerID].timeouts[hash] = curr_time + Tt;
+            int sender_id = peers[peerID]->pending_requests[hash].front();
+            peers[peerID]->timeouts[hash] = curr_time + Tt;
             timeoutQueue.push({{curr_time + Tt, peerID}, hash});
-            peers[peerID].sendGetRequest(hash, sender_id);
+            peers[peerID]->sendGetRequest(hash, sender_id);
         }
 
         if (!timeoutQueue.empty())
@@ -151,6 +152,7 @@ void Network::run(long long curr_time)
 
 void OverlayNetwork::run(long long curr_time)
 {
+    // cout << "Running sim for overlay network" << endl;
     vector<int> next_txn;
     pair<vector<int>, string> next_blk;
     pair<vector<int>, string> next_msg, next_tout;
@@ -163,21 +165,22 @@ void OverlayNetwork::run(long long curr_time)
     while (!blockQueue.empty() && next_blk.first[0] == curr_time)
 
     { // a block is ready to be broadcasted by its miner
+
         blockQueue.pop();
         int sender = next_blk.first[1];
         string blk_hash = next_blk.second;
-        if (peers[sender].malicious_leaf == peers[sender].seen_blocks[blk_hash]->parent_hash)
+        if (peers[sender]->malicious_leaf == peers[sender]->seen_blocks[blk_hash]->parent_hash)
         {
-            peers[sender].total_blocks++;
-            peers[sender].addBlocktoTree(blk_hash);
-            peers[sender].timeline[curr_time].push_back({blk_hash, peers[sender].seen_blocks[blk_hash]->parent_hash});
-            peers[sender].valid_timeline[curr_time].push_back({blk_hash, peers[sender].seen_blocks[blk_hash]->parent_hash});
-            peers[sender].broadcastHash(blk_hash);
-            peers[sender].generateBlock();
+            peers[sender]->total_blocks++;
+            peers[sender]->addBlocktoTree(blk_hash);
+            peers[sender]->timeline[curr_time].push_back({blk_hash, peers[sender]->seen_blocks[blk_hash]->parent_hash});
+            peers[sender]->valid_timeline[curr_time].push_back({blk_hash, peers[sender]->seen_blocks[blk_hash]->parent_hash});
+            peers[sender]->broadcastHash(blk_hash);
+            peers[sender]->generateBlock();
         }
         else
         {
-            peers[sender].seen_blocks.erase(blk_hash);
+            peers[sender]->seen_blocks.erase(blk_hash);
         }
         if (!blockQueue.empty())
             next_blk = blockQueue.top();
@@ -192,7 +195,7 @@ void OverlayNetwork::run(long long curr_time)
         // a transaction is ready to be broadcasted by its creator
         total_transactions++;
         transactionQueue.pop();
-        peers[next_txn[1]].broadcastTransaction();
+        peers[next_txn[1]]->broadcastTransaction();
         if (!transactionQueue.empty())
             next_txn = transactionQueue.top();
     }
@@ -206,19 +209,19 @@ void OverlayNetwork::run(long long curr_time)
         sendingQueue.pop();
         if (next_msg.first[1] == 0) // txn
         {
-            peers[next_msg.first[3]].receiveTransaction(next_msg.second);
+            peers[next_msg.first[3]]->receiveTransaction(next_msg.second);
         }
         else if (next_msg.first[1] == 1) // block
         {
-            peers[next_msg.first[3]].receiveBlock(next_msg.first[2], next_msg.second);
+            peers[next_msg.first[3]]->receiveBlock(next_msg.first[2], next_msg.second);
         }
         else if (next_msg.first[1] == 2) // hash
         {
-            peers[next_msg.first[3]].receiveHash(next_msg.second, next_msg.first[2], 1);
+            peers[next_msg.first[3]]->receiveHash(next_msg.second, next_msg.first[2], 1);
         }
         else if (next_msg.first[1] == 3) // get
         {
-            peers[next_msg.first[3]].receiveGetRequest(next_msg.second, next_msg.first[2], 1);
+            peers[next_msg.first[3]]->receiveGetRequest(next_msg.second, next_msg.first[2], 1);
         }
         if (!sendingQueue.empty())
         {
@@ -238,17 +241,17 @@ void OverlayNetwork::run(long long curr_time)
         int peerID = next_tout.first[1];
         string hash = next_tout.second;
         // it's possible that block has already been received, and data structures have been cleared
-        if (peers[peerID].pending_requests.find(hash) == peers[peerID].pending_requests.end())
+        if (peers[peerID]->pending_requests.find(hash) == peers[peerID]->pending_requests.end())
         {
             continue;
         }
-        peers[peerID].pending_requests[hash].pop();
-        if (!peers[peerID].pending_requests[hash].empty())
+        peers[peerID]->pending_requests[hash].pop();
+        if (!peers[peerID]->pending_requests[hash].empty())
         {
-            int sender_id = peers[peerID].pending_requests[hash].front();
-            peers[peerID].timeouts[hash] = curr_time + Tt;
+            int sender_id = peers[peerID]->pending_requests[hash].front();
+            peers[peerID]->timeouts[hash] = curr_time + Tt;
             timeoutQueue.push({{curr_time + Tt, peerID}, hash});
-            peers[peerID].sendGetRequest(hash, sender_id);
+            peers[peerID]->sendGetRequest(hash, sender_id);
         }
 
         if (!timeoutQueue.empty())

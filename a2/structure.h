@@ -52,7 +52,7 @@ public:
     treeNode(treeNode *parent_node, int id)
     {
         this->depth = parent_node ? parent_node->depth + 1 : 0;
-        this->parent_hash = parent_node->hash;
+        this->parent_hash = parent_node ? parent_node->parent_hash: "";
         this->block_id = id;
     }
 };
@@ -105,7 +105,7 @@ public:
     void processOrphanBlocks(string);
     bool validateBlock(Block *, map<int, int> &);
     // void writeBlockTimesToFile();
-    // int blocks_in_longest_chain();
+    int blocks_in_longest_chain();
     // void treeAnalysis();
     virtual void broadcastTransaction() = 0;
     virtual void receiveTransaction(string) = 0;

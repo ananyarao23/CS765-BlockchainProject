@@ -17,7 +17,6 @@ void Peer ::generateTransaction()
     normNet->transactionQueue.push({curr_time + ts, peerID});
 }
 
-
 /* After an interarrival period, the node generating the
 transaction chooses a random destination node and txn amount*/
 void HonestPeer ::broadcastTransaction()
@@ -44,11 +43,14 @@ void HonestPeer ::broadcastTransaction()
     transactionSet.insert(txn_params[0]);
     total_transactions++;
 
+    cout << "[HP]: " << "generated txn " << txn_params[0] << endl;
+
     for (auto p : neighbours)
     {
         int latency = normNet->calculateLatency(peerID, p, 8);
 
-        normNet -> sendingQueue.push({{curr_time + latency, 0, p}, new_txn});
+        normNet->sendingQueue.push({{curr_time + latency, 0, p}, new_txn});
+        cout << "[HPH]: " << "sending txn " << txn_params[0] << " to " << p << endl;
     }
     generateTransaction();
 }
@@ -78,16 +80,20 @@ void MaliciousPeer ::broadcastTransaction()
     transactionSet.insert(txn_params[0]);
     total_transactions++;
 
+    cout << "[MP]: " << "generated txn " << txn_params[0] << endl;
+
     for (auto p : neighbours)
     {
         int latency = normNet->calculateLatency(peerID, p, 8);
         normNet->sendingQueue.push({{curr_time + latency, 0, p}, new_txn});
+        cout << "[MPH]: " << "sending txn " << txn_params[0] << " to " << p << endl;
     }
 
     for (auto p : malicious_neighbours)
     {
         int latency = malNet->calculateLatency(peerID, p, 8);
         malNet->sendingQueue.push({{curr_time + latency, 0, p}, new_txn});
+        cout << "[MPO]: " << "sending txn " << txn_params[0] << " to " << p << endl;
     }
     generateTransaction();
 }
@@ -104,6 +110,7 @@ void HonestPeer::receiveTransaction(string txn)
 
     if (transactionSet.find(txn_id) == transactionSet.end())
     {
+        cout << "[HP]: " << "received txn " << txn_id << " from " << sender_id << endl;
         memPool.insert(txn);
         total_transactions++;
         for (auto p : neighbours)
@@ -112,7 +119,10 @@ void HonestPeer::receiveTransaction(string txn)
             {
                 int latency = normNet->calculateLatency(peerID, p, 8);
                 if (query(p))
+                {
+                    cout << "[HPH]: " << "sending txn " << txn_id << " to " << p << endl;
                     normNet->sendingQueue.push({{curr_time + latency, 0, p}, txn});
+                }
             }
         }
     }
@@ -128,6 +138,7 @@ void MaliciousPeer::receiveTransaction(string txn)
 
     if (transactionSet.find(txn_id) == transactionSet.end())
     {
+        cout << "[MP]: " << "received txn " << txn_id << " from " << sender_id << endl;
         memPool.insert(txn);
         memPool2.insert(txn);
         total_transactions++;
@@ -137,7 +148,10 @@ void MaliciousPeer::receiveTransaction(string txn)
             {
                 int latency = normNet->calculateLatency(peerID, p, 8);
                 if (query(p))
+                {
+                    cout << "[MPH]: " << "sending txn " << txn_id << " to " << p << endl;
                     normNet->sendingQueue.push({{curr_time + latency, 0, p}, txn});
+                }
             }
         }
 
@@ -147,7 +161,10 @@ void MaliciousPeer::receiveTransaction(string txn)
             {
                 int latency = malNet->calculateLatency(peerID, p, 8);
                 if (query(p))
+                {
+                    cout << "[MPO]: " << "sending txn " << txn_id << " to " << p << endl;
                     malNet->sendingQueue.push({{curr_time + latency, 0, p}, txn});
+                }
             }
         }
     }

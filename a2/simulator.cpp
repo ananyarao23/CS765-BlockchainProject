@@ -24,7 +24,11 @@ void Sim::start()
     for (auto& peer : peers)
     {
         peer->createTree(genesisBlock);
+        peer->generateBlock();
+        peer->generateTransaction();
+        cout<<"Peer "<<peer->peerID<<" tree created"<<endl;
     }
+    cout<<"xotwod"<<endl;
     while (curr_time < simTime)
     {
         normNet->run(curr_time);
@@ -74,8 +78,7 @@ int main(int argc, char **argv)
     // {
     //     Peer peer = *p;
     //     cout << setw(7) << peer.peerID
-    //     << setw(7) << (peer.slow ? "Slow" : "Fast")
-    //     // << setw(32) << peer.blocks_in_longest_chain()
+        // << setw(32) << peer.blocks_in_longest_chain()
     //     << setw(15) << int(peer.total_blocks)
     //     << setw(10) << fixed << setprecision(2) << (peer.total_blocks > 0 ? static_cast<double>(peer.blocks_in_longest_chain()) / peer.total_blocks : 0)
     //     << setw(25) << peer.maxDepth

@@ -2,6 +2,7 @@
 #define SIMULATOR_H
 
 #include "network.h"
+#include <cassert>
 #include "helper.h"
 
 class Peer;
@@ -20,16 +21,26 @@ public:
     Sim(int numPeers, double malFraction, float simTime)
         : numPeers(numPeers), malFraction(malFraction), simTime(simTime)
     {
+        vector<int> indices;
         normNet = new Network(numPeers);
         for (int i = 0; i < numPeers; i++)
         {
+            indices.push_back(i);
+        }
+        vector<vector<int>> graph = generate_graph(numPeers, indices);
+        for (int i = 0; i < numPeers; i++)
+        {
             peers.push_back(new HonestPeer(i, normNet));
+            peers[i]->neighbours = graph[i];
             peers[i]->hash_power = 1.0 / double(numPeers);
             peers[i]->slow = true;
         }
+        normNet->peers = peers;
+        
         vector<int> mal_idx = randomIndices(int(malFraction * numPeers), numPeers);
 
         malNet = new OverlayNetwork(numPeers, mal_idx);
+
         int cnt = 0;
         for (auto i : mal_idx)
         {
@@ -37,6 +48,17 @@ public:
             peers[i] = new MaliciousPeer(i, cnt, normNet, malNet);
             peers[i]->slow = false;
             cnt++;
+        }
+        malNet->peers = peers;
+        graph = generate_graph(numPeers, mal_idx);
+        for (auto i : mal_idx)
+        {
+            malNet->malicious_peers.insert(i);
+        }
+
+        for (auto i : mal_idx)
+        {
+            peers[i]->malicious_neighbours = graph[i];
         }
     }
     void start();
