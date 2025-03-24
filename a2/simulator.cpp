@@ -21,7 +21,7 @@ void Sim::start()
 {
     
     genesisBlock= new Block(0, -1, "", {});
-    for (auto peer : peers)
+    for (auto& peer : peers)
     {
         peer->createTree(genesisBlock);
     }
@@ -40,7 +40,7 @@ void Sim::start()
     //         // malicious nodes broadcast the new attacker's chain
 
     //     }
-    //     else if(MalNet->mined_length = NormNet->mined_length - 1)
+    //     else if(MalNet->mined_length == NormNet->mined_length - 1)
     //     {
     //         // malicious nodes broadcast the new attacker's chain
     //     }

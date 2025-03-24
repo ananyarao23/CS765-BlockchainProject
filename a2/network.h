@@ -69,9 +69,9 @@ class Network : public P2P
 {
 public:
     int mined_length;
-    Network(int np)
+    vector<Peer*>& peers;
+    Network(int np, vector<Peer*>& sim_peers) : peers(sim_peers)
     {
-        peers.resize(np);
         total_transactions = 0;
         forks = 0;
         max_txn = 0;
@@ -80,6 +80,8 @@ public:
         transactionQueue = {};
         blockQueue = {};
         vector<int> indices;
+        cout<<"np:"<<np<<endl;
+        cout<<peers.size()<<endl;
         for (int i = 0; i < np; i++)
         {
             indices.push_back(i);
@@ -111,7 +113,6 @@ public:
 
     OverlayNetwork(int np, vector<int> mal_idx)
     {
-        peers.resize(np);
         total_transactions = 0;
         forks = 0;
         max_txn = 0;
