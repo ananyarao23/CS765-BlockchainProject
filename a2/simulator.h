@@ -1,5 +1,5 @@
-// #ifndef SIMULATOR_H
-// #define SIMULATOR_H
+#ifndef SIMULATOR_H
+#define SIMULATOR_H
 
 #include "network.h"
 #include "helper.h"
@@ -9,32 +9,32 @@ class Peer;
 class Sim // simulator class
 {
 private:
-    OverlayNetwork *MalNet;
-    Network *NormNet;
+    OverlayNetwork *malNet;
+    Network *normNet;
 
 public:
-    float malPercent, I, Ttx; // simulation parameters
+    double malFraction; // simulation parameters
     int numPeers, simTime;
     vector<Peer *> peers; // all peers in the simulation
 
-    Sim(int numPeers, float malPercent, float I, float Ttx, float simTime)
-        : numPeers(numPeers), malPercent(malPercent), I(I), Ttx(Ttx), simTime(simTime)
+    Sim(int numPeers, double malFraction, float simTime)
+        : numPeers(numPeers), malFraction(malFraction), simTime(simTime)
     {
-        NormNet = new Network(numPeers);
+        normNet = new Network(numPeers);
         for (int i = 0; i < numPeers; i++)
         {
-            peers[i] = new HonestPeer(i,NormNet);
-            peers[i]->hash_power = 1.0 / float(numPeers);
+            peers.push_back(new HonestPeer(i, normNet));
+            peers[i]->hash_power = 1.0 / double(numPeers);
             peers[i]->slow = true;
         }
-        set<int> mal_idx = randomIndices(numPeers, malPercent);
+        vector<int> mal_idx = randomIndices(int(malFraction * numPeers), numPeers);
 
-        MalNet = new OverlayNetwork(int(numPeers * malPercent),mal_idx);
+        malNet = new OverlayNetwork(numPeers, mal_idx);
         int cnt = 0;
         for (auto i : mal_idx)
         {
             free(peers[i]);
-            peers[i] = new MaliciousPeer(i,cnt, NormNet, MalNet);
+            peers[i] = new MaliciousPeer(i, cnt, normNet, malNet);
             peers[i]->slow = false;
             cnt++;
         }
@@ -42,4 +42,4 @@ public:
     void start();
 };
 
-// #endif
+#endif

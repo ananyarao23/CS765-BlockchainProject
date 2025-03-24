@@ -1,7 +1,7 @@
-get - common / processing a get request (send block - different)
-time out
-hash function
-recieve block - different
+get - common / processing a get request (send block - different) done
+time out done
+hash function done
+recieve block - different done
 release of private chain
 generate block - different
 final simulation flow

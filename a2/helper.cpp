@@ -1,9 +1,9 @@
 #include "helper.h"
-#include <algorithm>
-#include <set>
+#include <bits/stdc++.h>
 #include <openssl/sha.h>
-#include <sstream>
 #include <iomanip>
+#include <random>
+
 using namespace std;
 
 /*
@@ -30,27 +30,37 @@ double sampleUniform(double a, double b)
     return dist(gen);
 }
 
+
 /*
 Returns x random indices from [0..n-1]
 */
-set<int> randomIndices(int x, int n)
+vector<int> randomIndices(int x, int n)
 {
     if (x > n)
     {
+        cerr << "Error: x cannot be greater than n!" << endl;
         return {};
     }
 
     static random_device rd;
     static mt19937 gen(rd());
-    uniform_int_distribution<int> dist(0, n - 1);
 
-    set<int> indices;
-    while (indices.size() < x)
+    vector<int> allIndices(n);
+    for (int i = 0; i < n; ++i)
     {
-        indices.insert(dist(gen));
+        allIndices[i] = i;
     }
 
+    shuffle(allIndices.begin(), allIndices.end(), gen);
+
+    vector<int> indices(allIndices.begin(), allIndices.begin() + x);
+
     return indices;
+}
+
+int chooseRandomPeer(vector<int> &peers)
+{
+    return peers[rand() % peers.size()];
 }
 
 /*
@@ -61,16 +71,18 @@ int generate_random_number(int lower_bound, int upper_bound)
     return lower_bound + rand() % (upper_bound - lower_bound + 1);
 }
 
+
 vector<vector<int>> graph; // global variable to store the adjaceny list of every node
-int num_peers;             // number of peers in network
+int num_peers; // number of peers in network
+
 
 // returns true if the given graph is connected (all nodes are reachable by each other)
-bool is_graph_connected()
+bool is_graph_connected(vector<int> &peers)
 {
     vector<bool> vis(num_peers, 0);
     queue<int> q;
-    q.push(0);
-    vis[0] = true;
+    q.push(peers[0]);
+    vis[peers[0]] = true;
     int peers_visited = 1;
 
     while (!q.empty())
@@ -89,13 +101,14 @@ bool is_graph_connected()
         }
     }
 
-    return (peers_visited == num_peers);
+    return (peers_visited == peers.size());
 }
 
+
 // checks is every node has a degree between 3 and 6 (as per the problem statement)
-bool are_degrees_correct()
+bool are_degrees_correct(vector<int>& peers)
 {
-    for (int i = 0; i < num_peers; ++i)
+    for (auto i: peers)
     {
         if (graph[i].size() < 3 || graph[i].size() > 6)
         {
@@ -105,33 +118,36 @@ bool are_degrees_correct()
     return true;
 }
 
+
 // checks if the graph is connected as well as satisfies the given degree constraints
-bool is_graph_valid()
+bool is_graph_valid(vector<int> &peers)
 {
-    return is_graph_connected() && are_degrees_correct();
+    return is_graph_connected(peers) && are_degrees_correct(peers);
 }
 
 // main function to generate random graphs
 // keeps generating until it finds a valid graph and finally return the adjacency list
-vector<vector<int>> generate_graph(int num_peers_l)
+vector<vector<int>> generate_graph(int total_peers, vector<int>& peers)
 {
-    num_peers = num_peers_l;
+    num_peers = total_peers;
     do
     {
-        vector<int> degrees;
-        for (int i = 0; i < num_peers; ++i)
+        vector<int> degrees(total_peers, 0);
+        for (auto u: peers)
         {
-            degrees.push_back(generate_random_number(3, 6));
+            degrees[u] = generate_random_number(3, 6);
         }
         graph = {};
-        for (int i = 0; i < num_peers; i++)
+        for (int i = 0; i < total_peers; i++)
         {
             graph.push_back(vector<int>());
         }
-        for (int i = 0; i < num_peers; i++)
+        for (int it = 0; it < peers.size(); it++)
         {
-            for (int j = i + 1; j < num_peers; j++)
+            int i = peers[it];
+            for (int jt = it + 1; jt < peers.size(); jt++)
             {
+                int j = peers[jt];
                 if (degrees[i] > 0 && degrees[j] > 0)
                 {
                     degrees[i]--;
@@ -141,7 +157,7 @@ vector<vector<int>> generate_graph(int num_peers_l)
                 }
             }
         }
-    } while (!is_graph_valid());
+    } while (!is_graph_valid(peers));
 
     return graph;
 }

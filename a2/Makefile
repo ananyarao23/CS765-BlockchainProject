@@ -1,5 +1,6 @@
 CXX = g++ -w
 CXXFLAGS = -g -Wall -Wextra -std=c++17 -O2
+LDFLAGS = -lssl -lcrypto  # Add OpenSSL libraries
 
 # Source files
 SRC = $(filter-out visualiser.cpp, $(wildcard *.cpp))
@@ -13,7 +14,7 @@ all: $(TARGET)
 
 # Linking step
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compilation step for each .cpp file
 %.o: %.cpp
