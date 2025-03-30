@@ -104,7 +104,7 @@ void HonestPeer::sendGetRequest(string hash_val, int receiver_id, int net)
     double messagesize = 0.064;
     cout << "[HPH]: Peer " << peerID << " sending get request to " << receiver_id << " for hash: " << hash_val << endl;
     int lt = normNet->calculateLatency(peerID, receiver_id, messagesize);
-    normNet->sendingQueue.push({{curr_time + lt, 3, receiver_id}, hash_val});
+    normNet->sendingQueue.push({{curr_time + lt, 3, peerID, receiver_id}, hash_val});
 }
 
 void MaliciousPeer::sendGetRequest(string hash_val, int receiver_id, int net)
@@ -170,6 +170,7 @@ void HonestPeer::generateBlock()
     int ts;
     do
     {
+        cout << "exponential sampling: " << I * 1000 / hash_power << endl;
         ts = generateExponential(I * 1000 / hash_power);
     } while (curr_time + ts < 0);
 
@@ -209,6 +210,7 @@ void MaliciousPeer::generateBlock()
     int ts;
     do
     {
+        cout << "exponential sampling: " << I * 1000 / hash_power << endl;
         ts = generateExponential(I * 1000 / hash_power);
     } while (curr_time + ts < 0);
 
@@ -221,8 +223,16 @@ void MaliciousPeer::generateBlock()
 void HonestPeer::sendBlock(string blk_hash, int rcvr, int net)
 {
     Block *blk = seen_blocks[blk_hash];
+    if(!blk)
+    {
+        cerr << "Block not seen yet, don't send it stupid" << endl;
+        exit(0);
+    }
     string message = "%%";
+    int a = blk->BlkID;
+    blk->BlkID = 5;
     message = message + blk_hash + "%%";
+    blk->BlkID = a;
     message = message + to_string(blk->BlkID) + "%%";
     message = message + to_string(blk->miner_id) + "%%";
     message = message + blk->parent_hash + "%%";
@@ -290,7 +300,6 @@ Broadcasts the received block to its neighbors
 
 void HonestPeer::receiveBlock(int sender_id, string block)
 {
-
     int idx = 2;
     while (block[idx] != '%')
         idx++;
@@ -299,13 +308,11 @@ void HonestPeer::receiveBlock(int sender_id, string block)
     {
         return; // block already received
     }
-    if (pending_requests[hash_val].front() != sender_id)
-    {
-        cout << "Block not requested" << endl; // block not requested
-        return;
-    }
-    pending_requests.erase(hash_val);
-    timeouts.erase(hash_val);
+
+    
+    
+    if (pending_requests.find(hash_val) != pending_requests.end()) pending_requests.erase(hash_val);
+    if (timeouts.find(hash_val) != timeouts.end()) timeouts.erase(hash_val);
     idx = idx + 2;
     int idx1 = idx;
     while (block[idx] != '%')
@@ -390,13 +397,8 @@ void MaliciousPeer::receiveBlock(int sender_id, string block)
     {
         return; // block already received
     }
-    if (pending_requests[hash_val].front() != sender_id)
-    {
-        cout << "Block not requested" << endl; // block not requested
-        return;
-    }
-    pending_requests.erase(hash_val);
-    timeouts.erase(hash_val);
+    if (pending_requests.find(hash_val) != pending_requests.end()) pending_requests.erase(hash_val);
+    if (timeouts.find(hash_val) != timeouts.end()) timeouts.erase(hash_val);
     idx = idx + 2;
     int idx1 = idx;
     while (block[idx] != '%')
@@ -704,7 +706,6 @@ void MaliciousPeer::addBlocktoTree(string hash_val)
     Block *block = seen_blocks[hash_val];
     treeNode *parentNode = blockTree[block->parent_hash];
     treeNode *child = new treeNode(parentNode, block->BlkID);
-    child->balances = parentNode->balances;
 
     for (string txn : block->txns)
     {

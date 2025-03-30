@@ -54,6 +54,7 @@ public:
         this->depth = parent_node ? parent_node->depth + 1 : 0;
         this->parent_hash = parent_node ? parent_node->parent_hash: "";
         this->block_id = id;
+        this->balances = parent_node ? parent_node->balances : map<int, int>();
     }
 };
 

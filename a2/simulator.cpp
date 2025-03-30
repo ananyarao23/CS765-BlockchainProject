@@ -31,6 +31,8 @@ void Sim::start()
     cout<<"xotwod"<<endl;
     while (curr_time < simTime)
     {
+        
+        cout << "TIMESTAMP" << " " << curr_time << endl;
         normNet->run(curr_time);
         malNet->run(curr_time);
         curr_time++;
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
         return 1;
     }
     numPeers = stoi(argv[1]);
-    I = stof(argv[3]) * 1000;
+    I = stof(argv[3]);
     Ttx = stof(argv[4]);
     Tt = stof(argv[5]);
     // numpeers malpercent simtime

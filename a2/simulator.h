@@ -35,7 +35,7 @@ public:
             peers[i]->hash_power = 1.0 / double(numPeers);
             peers[i]->slow = true;
         }
-        normNet->peers = peers;
+        
         
         vector<int> mal_idx = randomIndices(int(malFraction * numPeers), numPeers);
 
@@ -50,6 +50,11 @@ public:
             cnt++;
         }
         malNet->peers = peers;
+        normNet->peers = peers;
+        malNet->assignLinkSpeed();
+        normNet->assignLinkSpeed();
+        malNet->assignPropDelay();
+        normNet->assignPropDelay();
         graph = generate_graph(numPeers, mal_idx);
         for (auto i : mal_idx)
         {

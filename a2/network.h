@@ -78,6 +78,9 @@ public:
         sendingQueue = {};
         transactionQueue = {};
         blockQueue = {};
+        numPeers = np;
+        // assignPropDelay();
+        // assignLinkSpeed();
     }
 
     ~Network() {}
@@ -104,8 +107,10 @@ public:
         sendingQueue = {};
         transactionQueue = {};
         blockQueue = {};
-
+        numPeers = np;
         ringmasterID = chooseRandomPeer(mal_idx);
+        // assignLinkSpeed();
+        // assignPropDelay();
     }
 
     ~ OverlayNetwork() {}

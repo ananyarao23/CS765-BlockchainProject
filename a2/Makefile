@@ -18,7 +18,7 @@ $(TARGET): $(OBJ)
 
 # Compilation step for each .cpp file
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) -O0 $(CXXFLAGS) -c $< -o $@
 
 # Clean up
 clean:

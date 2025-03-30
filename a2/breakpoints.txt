@@ -1,0 +1,6 @@
+break simulator.cpp:32
+r 20 40 0.6 10 50 10
+display curr_time
+display normNet->transactionQueue
+display normNet->blockQueue
+display normNet->sendingQueue
