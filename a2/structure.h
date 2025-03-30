@@ -47,14 +47,17 @@ public:
     string parent_hash;
     string hash;
     int block_id;
+    int peerID;
     map<int, int> balances; // peerID to balances at this node
 
-    treeNode(treeNode *parent_node, int id)
+    treeNode(treeNode *parent_node, int id, int peerID)
     {
         this->depth = parent_node ? parent_node->depth + 1 : 0;
-        this->parent_hash = parent_node ? parent_node->parent_hash: "";
+        this->parent_hash = parent_node ? parent_node->hash : "parent_of_genesis";
         this->block_id = id;
+        this ->peerID = peerID;
         this->balances = parent_node ? parent_node->balances : map<int, int>();
+        // cout << "TreeNode created with depth " << depth << " and parent hash " << parent_hash << endl;
     }
 };
 
@@ -83,8 +86,8 @@ public:
     treeNode *genesis_blk;                                 // root of the tree
     map<string, treeNode *> blockTree;                     // maps blockID to the corresponding treeNode
     set<string> orphanBlocks;                              // set of orphan blocks
-    map<int, vector<pair<string, string>>> timeline;       // maps time to the all block IDs that were received at that time
-    map<int, vector<pair<string, string>>> valid_timeline; // maps time to the all valid block IDs that were received at that time
+    map<int, vector<pair<int, int>>> timeline;       // maps time to the all block IDs that were received at that time
+    map<int, vector<pair<int, int>>> valid_timeline; // maps time to the all valid block IDs that were received at that time
     unordered_map<string, Block *> seen_blocks;            // block hash to block content map
     unordered_map<string, queue<int>> pending_requests;    // block hash to node ids that sent the hash map
     unordered_map<string, int> timeouts;                   // block hash to timeout counter map
@@ -100,14 +103,14 @@ public:
 
     void setHashPower(double);
     void generateTransaction();
-    void createTree(Block *);
     bool query(int);
     void broadcastBlock(int);
     void processOrphanBlocks(string);
     bool validateBlock(Block *, map<int, int> &);
-    // void writeBlockTimesToFile();
+    void writeBlockTimesToFile();
     int blocks_in_longest_chain();
     // void treeAnalysis();
+    virtual void createTree(Block *) = 0;
     virtual void broadcastTransaction() = 0;
     virtual void receiveTransaction(string) = 0;
     virtual void generateBlock() = 0;
@@ -139,6 +142,7 @@ public:
         slow = false;
     }
     ~MaliciousPeer() {}
+    void createTree(Block *) override;
     void receiveBlock(int, string) override;
     void generateBlock() override;
     void receiveHash(string, int, int net = 0) override;
@@ -166,6 +170,7 @@ public:
         slow = true;
     }
     ~HonestPeer() {}
+    void createTree(Block *) override;
     void receiveBlock(int, string) override;
     void receiveHash(string, int, int net = 0) override;
     void broadcastHash(string) override;

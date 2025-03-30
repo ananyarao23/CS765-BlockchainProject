@@ -62,8 +62,10 @@ void Network::run(long long curr_time)
         {
             peers[sender]->total_blocks++;
             peers[sender]->addBlocktoTree(hash);
-            peers[sender]->timeline[curr_time].push_back({hash, peers[sender]->seen_blocks[hash]->parent_hash});
-            peers[sender]->valid_timeline[curr_time].push_back({hash, peers[sender]->seen_blocks[hash]->parent_hash});
+            int parent_id = peers[sender]->seen_blocks[peers[sender]->seen_blocks[hash]->parent_hash]->BlkID;
+            int bid = peers[sender]->seen_blocks[hash]->BlkID;
+            peers[sender]->timeline[curr_time].push_back({bid, parent_id});
+            peers[sender]->valid_timeline[curr_time].push_back({bid, parent_id});
             peers[sender]->broadcastHash(hash);
             peers[sender]->generateBlock();
         }
@@ -173,8 +175,10 @@ void OverlayNetwork::run(long long curr_time)
         {
             peers[sender]->total_blocks++;
             peers[sender]->addBlocktoTree(blk_hash);
-            peers[sender]->timeline[curr_time].push_back({blk_hash, peers[sender]->seen_blocks[blk_hash]->parent_hash});
-            peers[sender]->valid_timeline[curr_time].push_back({blk_hash, peers[sender]->seen_blocks[blk_hash]->parent_hash});
+            int parent_id = peers[sender]->seen_blocks[peers[sender]->seen_blocks[blk_hash]->parent_hash]->BlkID;
+            int bid = peers[sender]->seen_blocks[blk_hash]->BlkID;
+            peers[sender]->timeline[curr_time].push_back({bid, parent_id});
+            peers[sender]->valid_timeline[curr_time].push_back({bid, parent_id});
             peers[sender]->broadcastHash(blk_hash);
             peers[sender]->generateBlock();
         }

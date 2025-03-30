@@ -10,10 +10,10 @@ class Peer;
 class Sim // simulator class
 {
 private:
-    OverlayNetwork *malNet;
-    Network *normNet;
+Network *normNet;
 
 public:
+OverlayNetwork *malNet;
     double malFraction; // simulation parameters
     int numPeers, simTime;
     vector<Peer *> peers; // all peers in the simulation
@@ -35,11 +35,20 @@ public:
             peers[i]->hash_power = 1.0 / double(numPeers);
             peers[i]->slow = true;
         }
-        
-        
+
+        if (malFraction == 0)
+        {
+            normNet->peers = peers;
+            normNet->assignLinkSpeed();
+            normNet->assignPropDelay();
+            return;
+        }
+
         vector<int> mal_idx = randomIndices(int(malFraction * numPeers), numPeers);
 
         malNet = new OverlayNetwork(numPeers, mal_idx);
+
+        peers[malNet->ringmasterID]->hash_power *= int(malFraction * numPeers);
 
         int cnt = 0;
         for (auto i : mal_idx)
@@ -47,6 +56,7 @@ public:
             free(peers[i]);
             peers[i] = new MaliciousPeer(i, cnt, normNet, malNet);
             peers[i]->slow = false;
+            if (i != malNet->ringmasterID) peers[i]->hash_power = 0.0;
             cnt++;
         }
         malNet->peers = peers;
@@ -56,10 +66,6 @@ public:
         malNet->assignPropDelay();
         normNet->assignPropDelay();
         graph = generate_graph(numPeers, mal_idx);
-        for (auto i : mal_idx)
-        {
-            malNet->malicious_peers.insert(i);
-        }
 
         for (auto i : mal_idx)
         {

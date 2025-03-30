@@ -19,8 +19,8 @@ Block* genesisBlock;
 /* Starts the simulation */
 void Sim::start()
 {
-    
-    genesisBlock= new Block(0, -1, "", {});
+    srand(time(0));    
+    genesisBlock= new Block(0, -1, "parent_of_genesis", {});
     for (auto& peer : peers)
     {
         peer->createTree(genesisBlock);
@@ -28,34 +28,15 @@ void Sim::start()
         peer->generateTransaction();
         cout<<"Peer "<<peer->peerID<<" tree created"<<endl;
     }
-    cout<<"xotwod"<<endl;
+    
     while (curr_time < simTime)
     {
         
-        cout << "TIMESTAMP" << " " << curr_time << endl;
         normNet->run(curr_time);
-        malNet->run(curr_time);
+        if (malFraction != 0)  malNet->run(curr_time);
         curr_time++;
     }
 
-    // Discrete event simulator
-    // while (curr_time < simTime)
-    // {
-    //     if(MalNet->mined_length == NormNet->mined_length)
-    //     {
-    //         // malicious nodes broadcast the new attacker's chain
-
-    //     }
-    //     else if(MalNet->mined_length == NormNet->mined_length - 1)
-    //     {
-    //         // malicious nodes broadcast the new attacker's chain
-    //     }
-    //     else
-    //     {
-    //         // honest and overlay broadcast continues
-
-    //     }
-    // }
 }
 
 int main(int argc, char **argv)
@@ -66,29 +47,31 @@ int main(int argc, char **argv)
         return 1;
     }
     numPeers = stoi(argv[1]);
-    I = stof(argv[3]);
+    I = stof(argv[3])/1000;
     Ttx = stof(argv[4]);
     Tt = stof(argv[5]);
     // numpeers malpercent simtime
-    Sim *simulator = new Sim(stoi(argv[1]), double(stoi(argv[2]))/100, stoi(argv[6]) * 1000);
+    Sim *simulator = new Sim(stoi(argv[1]), double(stoi(argv[2]))/100, stoi(argv[6]));
     cout << "-----------------------------------------Starting the simulation-----------------------------------------" << endl;
     simulator->start();
 
-    cout << setw(7) << "Peer ID" << setw(7) << "Speed" << setw(7) << "CPU" << setw(32) << "Blocks owned in Longest Chain" << setw(15) << "Blocks mined" << setw(10) << "Ratio" << setw(25) << "Blocks in Longest Chain" << setw(25) << "Transactions generated" << endl;
+    cout << setw(7) << "Peer ID" << setw(32) << "Blocks owned in Longest Chain" << setw(15) << "Blocks mined" << setw(10) << "Ratio" << setw(25) << "Blocks in Longest Chain" << setw(25) << "Transactions generated" << "orphan blks"<<endl;
     cout << string(130, '-') << endl;
-    // for (auto p : simulator->peers)
-    // {
-    //     Peer peer = *p;
-    //     cout << setw(7) << peer.peerID
-        // << setw(32) << peer.blocks_in_longest_chain()
-    //     << setw(15) << int(peer.total_blocks)
-    //     << setw(10) << fixed << setprecision(2) << (peer.total_blocks > 0 ? static_cast<double>(peer.blocks_in_longest_chain()) / peer.total_blocks : 0)
-    //     << setw(25) << peer.maxDepth
-    //     << setw(25) << peer.total_transactions
-    //     << endl;
+    for (auto p : simulator->peers)
+    {
+        cout << setw(7) << p->peerID
+        << setw(32) << p->blocks_in_longest_chain()
+        << setw(15) << int(p->total_blocks)
+        << setw(10) << fixed << setprecision(2) << (p->total_blocks > 0 ? static_cast<double>(p->blocks_in_longest_chain()) / p->total_blocks : 0)
+        << setw(25) << p->maxDepth
+        << setw(25) << p->total_transactions
+        << setw(25) << p->orphanBlocks.size()
+        << endl;
 
-    //     peer.writeBlockTimesToFile();
-    // }
+        p->writeBlockTimesToFile();
+    }
+    // cout<<simulator->peers[simulator->malNet->ringmasterID]->malicious_len<<endl;
+    
     cout << "------------------------------------------------Simulation ended------------------------------------------" << endl;
 
     // ofstream outFile("simulation_results.csv");
