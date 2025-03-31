@@ -3,6 +3,8 @@
         "map": "cpp",
         "new": "cpp",
         "iomanip": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "fstream": "cpp",
+        "ostream": "cpp"
     }
 }

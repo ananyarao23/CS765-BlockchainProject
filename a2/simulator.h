@@ -7,13 +7,19 @@
 
 class Peer;
 
-class Sim // simulator class
+
+/*
+Main simulator class 
+    - runs both the networks 
+    - stores attributes common to both networks
+*/
+class Sim 
 {
 private:
-Network *normNet;
+    Network *normNet;
 
 public:
-OverlayNetwork *malNet;
+    OverlayNetwork *malNet;
     double malFraction; // simulation parameters
     int numPeers, simTime;
     vector<Peer *> peers; // all peers in the simulation
@@ -22,7 +28,7 @@ OverlayNetwork *malNet;
         : numPeers(numPeers), malFraction(malFraction), simTime(simTime)
     {
         vector<int> indices;
-        normNet = new Network(numPeers);
+        normNet = new Network(numPeers); // instantiate original network
         for (int i = 0; i < numPeers; i++)
         {
             indices.push_back(i);
@@ -44,27 +50,44 @@ OverlayNetwork *malNet;
             return;
         }
 
+        // choose random indices to make them malicious
         vector<int> mal_idx = randomIndices(int(malFraction * numPeers), numPeers);
 
-        malNet = new OverlayNetwork(numPeers, mal_idx);
+        malNet = new OverlayNetwork(numPeers, mal_idx); // instantiate malicious network
 
         peers[malNet->ringmasterID]->hash_power *= int(malFraction * numPeers);
-
         int cnt = 0;
         for (auto i : mal_idx)
         {
             free(peers[i]);
+            // populate the peer* vector with malicious peers
             peers[i] = new MaliciousPeer(i, cnt, normNet, malNet);
             peers[i]->slow = false;
-            if (i != malNet->ringmasterID) peers[i]->hash_power = 0.0;
+            peers[i]->neighbours = graph[i];
+            if (i != malNet->ringmasterID)
+            {
+                peers[i]->hash_power = 0.0;
+            }
+            else 
+            {
+                // ringmaster gets the hash power of all malicious peers
+                peers[i]->hash_power = 1.0 / double(numPeers);
+                peers[i]->hash_power *= int(malFraction * numPeers);
+            }
             cnt++;
         }
+
+        // populate the peers vectors of both networks
         malNet->peers = peers;
         normNet->peers = peers;
+
+        // assign link speed and propagataion delay to nodes of both networks
         malNet->assignLinkSpeed();
         normNet->assignLinkSpeed();
         malNet->assignPropDelay();
         normNet->assignPropDelay();
+
+        // generate malicious graph - following the degree constraint - 3 to 6
         graph = generate_graph(numPeers, mal_idx);
 
         for (auto i : mal_idx)
@@ -73,6 +96,7 @@ OverlayNetwork *malNet;
         }
     }
     void start();
+    void stop();
 };
 
 #endif

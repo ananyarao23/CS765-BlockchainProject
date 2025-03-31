@@ -1,0 +1,9 @@
+digraph BlockchainTree {
+    rankdir=LR;
+    node [shape=circle, style=filled, fontcolor=black];
+
+    0 [fillcolor=green];
+    0 [shape=doublecircle, color=blue];
+    55 [fillcolor=green];
+    0 -> 55;
+}

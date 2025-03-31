@@ -30,7 +30,6 @@ double sampleUniform(double a, double b)
     return dist(gen);
 }
 
-
 /*
 Returns x random indices from [0..n-1]
 */
@@ -71,10 +70,8 @@ int generate_random_number(int lower_bound, int upper_bound)
     return lower_bound + rand() % (upper_bound - lower_bound + 1);
 }
 
-
 vector<vector<int>> graph; // global variable to store the adjaceny list of every node
-int num_peers; // number of peers in network
-
+int num_peers;             // number of peers in network
 
 // returns true if the given graph is connected (all nodes are reachable by each other)
 bool is_graph_connected(vector<int> &peers)
@@ -104,11 +101,10 @@ bool is_graph_connected(vector<int> &peers)
     return (peers_visited == peers.size());
 }
 
-
 // checks is every node has a degree between 3 and 6 (as per the problem statement)
-bool are_degrees_correct(vector<int>& peers)
+bool are_degrees_correct(vector<int> &peers)
 {
-    for (auto i: peers)
+    for (auto i : peers)
     {
         if (graph[i].size() < 3 || graph[i].size() > 6)
         {
@@ -118,7 +114,6 @@ bool are_degrees_correct(vector<int>& peers)
     return true;
 }
 
-
 // checks if the graph is connected as well as satisfies the given degree constraints
 bool is_graph_valid(vector<int> &peers)
 {
@@ -127,13 +122,18 @@ bool is_graph_valid(vector<int> &peers)
 
 // main function to generate random graphs
 // keeps generating until it finds a valid graph and finally return the adjacency list
-vector<vector<int>> generate_graph(int total_peers, vector<int>& peers)
+vector<vector<int>> generate_graph(int total_peers, vector<int> &peers)
 {
+    if (peers.size() < 4)
+    {
+        cout << "Need atleast 4 peers to generate graph!!" << endl;
+        exit(1);
+    }
     num_peers = total_peers;
     do
     {
         vector<int> degrees(total_peers, 0);
-        for (auto u: peers)
+        for (auto u : peers)
         {
             degrees[u] = generate_random_number(3, 6);
         }
@@ -239,4 +239,16 @@ string construct_coinbase(int peerID, int txn_id)
     stringstream ss;
     ss << txn_id << ": " << peerID << " mines 50 coins";
     return ss.str();
+}
+
+// {{block_id, miner_id}, {parent_hash, txns }}
+pair<string, string> extract_root(string s)
+{
+
+    size_t pos1 = s.find('%');
+    size_t pos2 = s.find('%', pos1 + 1);
+
+    string s2 = s.substr(pos1 + 1, pos2 - pos1 - 1);
+    string s3 = s.substr(pos2 + 1);
+    return {s2, s3}; // Assuming you're returning a pair
 }

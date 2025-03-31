@@ -1,0 +1,175 @@
+Malicious peers: 8 1 5 6 15 16 14 2 
+Ringmaster ID: 6
+ringmaster given 0.4 hash power
+-----------------------------------------Starting the simulation-----------------------------------------
+0x5555555b84c0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node0
+Peer 0 tree created
+called create tree on peer 1
+0x5555555e6760 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node1
+Peer 1 tree created
+called create tree on peer 2
+0x5555555e6bf0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node2
+Peer 2 tree created
+0x5555555e6f60 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node3
+Peer 3 tree created
+0x5555555e74c0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node4
+Peer 4 tree created
+called create tree on peer 5
+0x5555555e7b90 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node5
+Peer 5 tree created
+called create tree on peer 6
+0x5555555e7f20 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node6
+MP entered generate block
+hi proseccing txns
+MP calculated hash
+MP pushing block to block queue
+MP exited generate block
+Peer 6 tree created
+0x5555555e8550 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node7
+Peer 7 tree created
+called create tree on peer 8
+0x5555555e8af0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node8
+Peer 8 tree created
+0x5555555e8ef0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node9
+Peer 9 tree created
+0x5555555e9660 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node10
+Peer 10 tree created
+0x5555555e9c00 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node11
+Peer 11 tree created
+0x5555555ea1a0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node12
+Peer 12 tree created
+0x5555555ea740 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node13
+Peer 13 tree created
+called create tree on peer 14
+0x5555555eb0e0 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node14
+Peer 14 tree created
+called create tree on peer 15
+0x5555555eb470 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node15
+Peer 15 tree created
+called create tree on peer 16
+0x5555555eb870 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node16
+Peer 16 tree created
+0x5555555ebf80 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node17
+Peer 17 tree created
+0x5555555ec590 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node18
+Peer 18 tree created
+0x5555555ecb30 f100c71c275fb1857ca9038d459c90769251aee312064ce92442f016c01366a2 tree node19
+Peer 19 tree created
+[MPO]: 6 broadcasting hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d to 8
+[MPO]: 6 broadcasting hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d to 1
+[MPO]: 6 broadcasting hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d to 5
+MP entered generate block
+hi proseccing txns
+MP calculated hash
+MP pushing block to block queue
+MP exited generate block
+[MPHprint c/O]: Peer 8 received hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[MPO]: Peer 8 sending get request to 6 for hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[MPHprint c/O]: Peer 5 received hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[MPO]: Peer 5 sending get request to 6 for hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[HPH]: Peer 6 rcvd get request for hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d from  5
+[HPH]: Peer 6 rcvd get request for hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d from  8
+[MPHprint c/O]: Peer 1 received hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[MPO]: Peer 1 sending get request to 6 for hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+8 0
+0x5555555edb70 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d tree node8
+Orphan blocks processed for5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+5 0
+0x5555555edea0 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d tree node5
+Orphan blocks processed for5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[HPH]: Peer 6 rcvd get request for hash: 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d from  1
+1 0
+0x5555555ee1b0 5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d tree node1
+Orphan blocks processed for5c271380a70906b0079f2ad23ebb9ff43bc5d2aa1f844ac40f2e4fd9109c646d
+[HPH]: 17 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 14
+[HPH]: 17 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 15
+[HPH]: 17 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 16
+[HPH]: 17 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 18
+[HPH]: 17 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 19
+[HPH]: Peer 19 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 19 sending get request to 17 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPHprint c/O]: Peer 16 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPH]: Peer 16 sending get request to 17 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 18 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 18 sending get request to 17 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 17 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  18
+Block 11 sent to 18 by HP 17in normNet
+[MPHprint c/O]: Peer 14 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPH]: Peer 14 sending get request to 17 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 17 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  16
+Block 11 sent to 16 by HP 17in normNet
+[MPHprint c/O]: Peer 15 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPH]: Peer 15 sending get request to 17 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 17 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  19
+Block 11 sent to 19 by HP 17in normNet
+18 0
+[HPH]: 18 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 14
+[HPH]: 18 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 16
+[HPH]: 18 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 17
+[HPH]: 18 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 19
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 17 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  15
+Block 11 sent to 15 by HP 17in normNet
+16 0
+0x5555555efc80 af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f tree node16
+[MPO]: 16 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 8
+[MPO]: 16 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 15
+[MPO]: 16 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 14
+[MPO]: 16 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 2
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPHprint c/O]: Peer 2 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPO]: Peer 2 sending get request to 16 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 16 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  2
+[HPH]: Peer 17 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  14
+Block 11 sent to 14 by HP 17in normNet
+2 0
+0x5555555f2670 af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f tree node2
+[MPO]: 2 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 15
+[MPO]: 2 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 16
+[MPO]: 2 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 14
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPHprint c/O]: Peer 8 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPO]: Peer 8 sending get request to 16 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+19 0
+[HPH]: 19 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 16
+[HPH]: 19 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 17
+[HPH]: 19 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 18
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 16 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  8
+8 0
+0x5555555f3650 af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f tree node8
+[MPO]: 8 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 1
+[MPO]: 8 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 5
+[MPO]: 8 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 6
+[MPO]: 8 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 15
+[MPO]: 8 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 16
+[MPO]: 8 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 14
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPHprint c/O]: Peer 1 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPO]: Peer 1 sending get request to 8 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPHprint c/O]: Peer 6 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPO]: Peer 6 sending get request to 8 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPHprint c/O]: Peer 5 received hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[MPO]: Peer 5 sending get request to 8 for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 8 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  6
+6 0
+0x5555555f47d0 af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f tree node6
+[MPO]: 6 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 8
+[MPO]: 6 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 1
+[MPO]: 6 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 5
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+[HPH]: Peer 8 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  5
+[HPH]: Peer 8 rcvd get request for hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f from  1
+1 0
+0x5555555f4050 af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f tree node1
+[MPO]: 1 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 8
+[MPO]: 1 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 5
+[MPO]: 1 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 6
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f
+5 0
+0x5555555f4ac0 af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f tree node5
+[MPO]: 5 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 8
+[MPO]: 5 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 1
+[MPO]: 5 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 6
+[MPO]: 5 broadcasting hash: af529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f to 15
+Orphan blocks processed foraf529d05dab5056d343d1eb352611b2dd95df0317bc54ee3700cb8aaeafcad9f

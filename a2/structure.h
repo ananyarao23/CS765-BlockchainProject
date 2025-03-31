@@ -22,6 +22,7 @@ extern float Tt;
 extern float Ttx;
 extern float I;
 extern int numPeers;
+extern bool eclipse_attack;
 
 class Block
 {
@@ -31,13 +32,7 @@ public:
     string parent_hash;
     vector<string> txns;
 
-    Block(int id, int miner_id, string parent_hash, vector<string> txns)
-    {
-        this->miner_id = miner_id;
-        this->parent_hash = parent_hash;
-        this->txns = txns;
-        this->BlkID = id;
-    }
+    Block(int id, int miner_id, string parent_hash, vector<string> txns);
 };
 
 class treeNode // for the nodes of the tree stored by each peer
@@ -50,15 +45,7 @@ public:
     int peerID;
     map<int, int> balances; // peerID to balances at this node
 
-    treeNode(treeNode *parent_node, int id, int peerID)
-    {
-        this->depth = parent_node ? parent_node->depth + 1 : 0;
-        this->parent_hash = parent_node ? parent_node->hash : "parent_of_genesis";
-        this->block_id = id;
-        this ->peerID = peerID;
-        this->balances = parent_node ? parent_node->balances : map<int, int>();
-        // cout << "TreeNode created with depth " << depth << " and parent hash " << parent_hash << endl;
-    }
+    treeNode(treeNode *parent_node, int id, int peerID);
 };
 
 class Network;
@@ -69,7 +56,7 @@ class Peer
 public:
     int peerID;
     Network *normNet;
-    int malicious_len;
+    // int malicious_len;
     set<string> memPool2;
     bool slow;
     double hash_power;
@@ -87,93 +74,81 @@ public:
     map<string, treeNode *> blockTree;                     // maps blockID to the corresponding treeNode
     set<string> orphanBlocks;                              // set of orphan blocks
     map<int, vector<pair<int, int>>> timeline;       // maps time to the all block IDs that were received at that time
-    map<int, vector<pair<int, int>>> valid_timeline; // maps time to the all valid block IDs that were received at that time
+    map<int, vector<vector<int>>> valid_timeline; // maps time to the all valid block IDs that were received at that time
     unordered_map<string, Block *> seen_blocks;            // block hash to block content map
     unordered_map<string, queue<int>> pending_requests;    // block hash to node ids that sent the hash map
     unordered_map<string, int> timeouts;                   // block hash to timeout counter map
     vector<string> toRemove;
-    string malicious_leaf;
+    string longestMalChain;
+    // string malicious_leaf;
 
-    Peer()
-    {
-        malicious_len = 0;
-        malicious_neighbours = {};
-    }
+    Peer();
+    
     virtual ~Peer();
 
     void setHashPower(double);
     void generateTransaction();
     bool query(int);
     void broadcastBlock(int);
-    void processOrphanBlocks(string);
     bool validateBlock(Block *, map<int, int> &);
     void writeBlockTimesToFile();
-    int blocks_in_longest_chain();
+    virtual pair<int, int> blocks_in_longest_chain() = 0;
     // void treeAnalysis();
+    virtual void startReleasingChain() = 0;
     virtual void createTree(Block *) = 0;
     virtual void broadcastTransaction() = 0;
     virtual void receiveTransaction(string) = 0;
     virtual void generateBlock() = 0;
     virtual void receiveBlock(int, string) = 0;
-    virtual void broadcastHash(string) = 0;
+    virtual void broadcastHash(string, int net = 0) = 0;
     virtual void receiveHash(string, int, int net = 0) = 0;
     virtual void sendGetRequest(string, int, int net = 0) = 0;
     virtual void receiveGetRequest(string, int, int net = 0) = 0;
     virtual void sendBlock(string, int, int net = 0) = 0;
     virtual void addBlocktoTree(string) = 0;
+    virtual void releaseChain(string) = 0;
+    virtual void processOrphanBlocks(string) = 0;
 };
 
 class MaliciousPeer : public Peer
 {
 private:
     OverlayNetwork *malNet;
+    // string curr_attack_root;  // hash val
+    set<string> released_chains;
+    set<string> blocks_to_release;
 
 public:
-    MaliciousPeer(int pID, int mID, Network *normNet, OverlayNetwork *malNet)
-    {
-        this->normNet = normNet;
-        this->malNet = malNet;
-        peerID = pID;
-        total_blocks = 0;
-        total_transactions = 0;
-        failed_txns = 0;
-        maxDepth = 0;
-        longestChain = "";
-        slow = false;
-    }
+    MaliciousPeer(int pID, int mID, Network *normNet, OverlayNetwork *malNet);
     ~MaliciousPeer() {}
+    pair<int, int> blocks_in_longest_chain() override;
+    void startReleasingChain() override;
     void createTree(Block *) override;
     void receiveBlock(int, string) override;
     void generateBlock() override;
     void receiveHash(string, int, int net = 0) override;
-    void broadcastHash(string) override;
+    void broadcastHash(string, int net = 0) override;
     void sendGetRequest(string, int, int net = 0) override;
     void receiveGetRequest(string, int, int net = 1) override;
     void sendBlock(string, int, int net = 1) override;
     void addBlocktoTree(string) override;
     void receiveTransaction(string) override;
     void broadcastTransaction() override;
+    void releaseChain(string) override;
+    void processOrphanBlocks(string) override;
 };
 
 class HonestPeer : public Peer
 {
 public:
-    HonestPeer(int pID, Network *normNet)
-    {
-        this->normNet = normNet;
-        peerID = pID;
-        total_blocks = 0;
-        total_transactions = 0;
-        failed_txns = 0;
-        maxDepth = 0;
-        longestChain = "";
-        slow = true;
-    }
+    HonestPeer(int pID, Network *normNet);
     ~HonestPeer() {}
+    pair<int, int> blocks_in_longest_chain() override;
+    void startReleasingChain() override;
     void createTree(Block *) override;
     void receiveBlock(int, string) override;
     void receiveHash(string, int, int net = 0) override;
-    void broadcastHash(string) override;
+    void broadcastHash(string, int net = 0) override;
     void sendGetRequest(string, int, int net = 0) override;
     void receiveGetRequest(string, int, int net = 0) override;
     void sendBlock(string, int, int net = 0) override;
@@ -181,6 +156,8 @@ public:
     void generateBlock() override;
     void receiveTransaction(string) override;
     void broadcastTransaction() override;
+    void releaseChain(string) override;
+    void processOrphanBlocks(string) override;
 };
 
 #endif

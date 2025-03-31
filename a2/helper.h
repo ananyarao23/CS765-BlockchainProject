@@ -29,4 +29,6 @@ string construct_txn(const vector<int> &transaction);
 
 string construct_coinbase(int peerID, int txn_id);
 
+pair<string, string> extract_root(string);
+
 #endif

@@ -6,76 +6,117 @@
 
 using namespace std;
 
-Peer::~Peer()
+/*
+parses the string, corresponding to a block, sent over network
+all the attributes of block stored in such string are separated using delimiter "%%"
+this string begins and end with "%%"
+*/
+
+pair<string, Block *> parse_block(const string &block)
 {
-    for (auto it : blockTree)
+    int idx = 2;
+    while (block[idx] != '%')
+        idx++;
+    string hash_val = block.substr(2, idx - 2); // extract the hash of the block
+
+    idx = idx + 2;
+    int idx1 = idx;
+    while (block[idx] != '%')
+        idx++;
+    int blk_id = stoi(block.substr(idx1, idx - idx1)); // extract the block_id of the block
+    idx = idx + 2;
+    idx1 = idx;
+    while (block[idx] != '%')
+        idx++;
+    int miner_id = stoi(block.substr(idx1, idx - idx1)); // extract the miner_id of the block
+    idx = idx + 2;
+    idx1 = idx;
+    while (block[idx] != '%')
+        idx++;
+    string parent_hash = block.substr(idx1, idx - idx1); // extract the parent_hash of the bloc
+    idx = idx + 2;
+    idx1 = idx;
+    vector<string> transactions;
+    while (idx < block.length()) // extract the transactions
     {
-        delete it.second;
+        while (block[idx] != '%')
+            idx++;
+        string txn = block.substr(idx1, idx - idx1);
+        idx = idx + 2;
+        idx1 = idx;
+        transactions.push_back(txn);
     }
-    delete normNet;
-    delete genesis_blk;
+    Block *block_ptr = new Block(blk_id, miner_id, parent_hash, transactions); // make a block object
+    return {hash_val, block_ptr};
 }
 
 /*
-Broadcasts received block's hash to its neighbors
+Honest Peer - Broadcasts received block's hash to its neighbors (in original network)
 */
-
-void HonestPeer::broadcastHash(string hash_val)
+void HonestPeer::broadcastHash(string hash_val, int net)
 {
     double messagesize = 0.064;
     for (auto receiver : neighbours)
     {
-        cout << "[HPH]: " << peerID << " broadcasting hash: " << hash_val << " to " << receiver << endl;
         int lt = normNet->calculateLatency(peerID, receiver, messagesize);
         normNet->sendingQueue.push({{curr_time + lt, 2, peerID, receiver}, hash_val});
     }
 }
 
-void MaliciousPeer::broadcastHash(string hash_val)
+
+/*
+Malicious Peer - Broadcats recieved block's hash to it's neighbors in both networks (overlay and original)
+*/
+void MaliciousPeer::broadcastHash(string hash_val, int net)
 {
     double messagesize = 0.064;
-    for (auto receiver : neighbours)
+    if (net == 0)
     {
-        cout << "[MPH]: " << peerID << " broadcasting hash: " << hash_val << " to " << receiver << endl;
-        int lt = normNet->calculateLatency(peerID, receiver, messagesize);
-        normNet->sendingQueue.push({{curr_time + lt, 2, peerID, receiver}, hash_val});
+        for (auto receiver : neighbours)
+        {
+            int lt = normNet->calculateLatency(peerID, receiver, messagesize);
+            normNet->sendingQueue.push({{curr_time + lt, 2, peerID, receiver}, hash_val});
+        }
     }
 
     for (auto receiver : malicious_neighbours)
     {
-        cout << "[MPO]: " << peerID << " broadcasting hash: " << hash_val << " to " << receiver << endl;
         int lt = malNet->calculateLatency(peerID, receiver, messagesize);
         malNet->sendingQueue.push({{curr_time + lt, 2, peerID, receiver}, hash_val});
     }
 }
 
-void HonestPeer::receiveHash(string hash_val, int sender_id, int net)
-{
 
+/*
+Honest Peer - on receiveing a hash, the received send get request into the network, intended for the sender of hash
+*/
+void HonestPeer::receiveHash(string hash_val, int sender_id, int)
+{
     // If the full block has already been received, discard the hash
     if (seen_blocks.find(hash_val) != seen_blocks.end())
     {
         return;
     }
-
     // If this is the first time seeing the hash, send get request to retrieve full block
     else if (pending_requests[hash_val].empty())
     {
         pending_requests[hash_val].push(sender_id); // entry has to be deleted when tiemout is over
         timeouts[hash_val] = curr_time + Tt;        // entry has to be deleted when timeout is over
         normNet->timeoutQueue.push({{curr_time + Tt, peerID}, hash_val});
-        cout << "[HPH]: Peer " << peerID << " received hash: " << hash_val << endl;
         sendGetRequest(hash_val, sender_id);
         return;
     }
 
     else
     {
-        cout << "[HPH]: Peer " << peerID << " received hash again for hash: " << hash_val << endl;
         pending_requests[hash_val].push(sender_id);
     }
 }
 
+
+/*
+Malicious Peer - on receiveing a hash, the received send get request into the network, intended for the sender of hash
+*/
 void MaliciousPeer::receiveHash(string hash_val, int sender_id, int net)
 {
 
@@ -91,7 +132,6 @@ void MaliciousPeer::receiveHash(string hash_val, int sender_id, int net)
         pending_requests[hash_val].push(sender_id); // entry has to be deleted when tiemout is over
         timeouts[hash_val] = curr_time + Tt;        // entry has to be deleted when timeout is over
         malNet->timeoutQueue.push({{curr_time + Tt, peerID}, hash_val});
-        cout << "[MPHprint c/O]: Peer " << peerID << " received hash: " << hash_val << endl;
         sendGetRequest(hash_val, sender_id, net);
         return;
     }
@@ -102,51 +142,73 @@ void MaliciousPeer::receiveHash(string hash_val, int sender_id, int net)
     }
 }
 
+
+/*
+Honest Peer - Send get request in the network net, also simulates a latentcy
+*/
 void HonestPeer::sendGetRequest(string hash_val, int receiver_id, int net)
 {
     double messagesize = 0.064;
-    cout << "[HPH]: Peer " << peerID << " sending get request to " << receiver_id << " for hash: " << hash_val << endl;
     int lt = normNet->calculateLatency(peerID, receiver_id, messagesize);
     normNet->sendingQueue.push({{curr_time + lt, 3, peerID, receiver_id}, hash_val});
 }
 
+/*
+Malicious Peer - Send get request in the network net, also simulates a latentcy
+*/
 void MaliciousPeer::sendGetRequest(string hash_val, int receiver_id, int net)
 {
     double messagesize = 0.064;
     if (net == 1)
     {
-        cout << "[MPO]: Peer " << peerID << " sending get request to " << receiver_id << " for hash: " << hash_val << endl;
 
         int lt = malNet->calculateLatency(peerID, receiver_id, messagesize);
         malNet->sendingQueue.push({{curr_time + lt, 3, peerID, receiver_id}, hash_val});
     }
     else
     {
-        cout << "[MPH]: Peer " << peerID << " sending get request to " << receiver_id << " for hash: " << hash_val << endl;
         int lt = normNet->calculateLatency(peerID, receiver_id, messagesize);
         normNet->sendingQueue.push({{curr_time + lt, 3, peerID, receiver_id}, hash_val});
     }
 }
 
+/*
+Honest Peer - Send block to the sender of get request over the network net
+*/
 void HonestPeer::receiveGetRequest(string blk_hash, int rcvr, int net)
 {
-    cout << "[HPH]: Peer " << peerID << " rcvd get request for hash: " << blk_hash << " from  " << rcvr << endl;
     sendBlock(blk_hash, rcvr, 0);
 }
 
+/*
+Malicious Peer - Send block to the sender of get request over the network net
+                 it serves to the get request of an honest neighbour if and only if eclise attack is not enabled
+*/
 void MaliciousPeer::receiveGetRequest(string blk_hash, int rcvr, int net)
 {
-    cout << "[HPH]: Peer " << peerID << " rcvd get request for hash: " << blk_hash << " from  " << rcvr << endl;
-    if (net == 0)
+    if (!eclipse_attack)
+    {
+        sendBlock(blk_hash, rcvr, net);
         return;
+    }
     if (malNet->malicious_peers.find(rcvr) != malNet->malicious_peers.end())
+    {
+        sendBlock(blk_hash, rcvr, net);
+    }
+    else if (blocks_to_release.find(blk_hash) != blocks_to_release.end())
     {
         sendBlock(blk_hash, rcvr, net);
     }
 }
 
+/*
+Honest Peer - Mine block on longest chain's leaf and add it to network's block queue to simulate interarrival
+            time, based on the hash power of the peer
+*/
 void HonestPeer::generateBlock()
 {
+    if (normNet->stop)
+        return;
     int num_txns = 0;
     vector<string> txns;
     treeNode *parent_node = blockTree.at(longestChain);
@@ -163,37 +225,26 @@ void HonestPeer::generateBlock()
 
     temp_bals[peerID] += 50; // coinbase
 
-    cout << "SElf check for blk " << blkIDctr << endl;
-    cout << "mining on " << longestChain << endl;
-    for (auto it : temp_bals)
-    {
-        cout << it.first << " " << it.second << endl;
-    }
     for (string txn : memPool)
     {
         vector<int> txn_vector = parse_txn(txn);
-        // txn id, x pays y amt
 
-        if (temp_bals[txn_vector[1]] < txn_vector[3])
+        int sender_id = txn_vector[1];
+        int receiver_id = txn_vector[2];
+        int amt = txn_vector[3];
+
+        if (temp_bals[sender_id] < amt)
         {
             continue;
         }
-        temp_bals[txn_vector[1]] -= txn_vector[3];
-        temp_bals[txn_vector[2]] += txn_vector[3];
+        temp_bals[sender_id] -= amt;
+        temp_bals[receiver_id] += amt;
 
-        cout << "AAAAA" << txn << endl;
-
-        // int sender_id = txn_vector[1];
-        // int amt = txn_vector[3];
-
-        // if (parent_node->balances[sender_id] >= amt)
-        // {
         txns.push_back(txn);
         num_txns++;
-        // }
+
         if (num_txns > 999)
         {
-            cout << "Block ID " << blkIDctr << " fully filled" << endl;
             break;
         }
     }
@@ -204,72 +255,87 @@ void HonestPeer::generateBlock()
     int ts;
     do
     {
-        cout << "exponential sampling: " << I * 1000 / hash_power << endl;
         ts = generateExponential(I * 1000 / hash_power);
     } while (curr_time + ts < 0);
 
     normNet->blockQueue.push({{curr_time + ts, peerID}, hash_val});
-    cout << "Block " << blk->BlkID << " generated by HP " << peerID << endl;
-    cout << "hash value: " << hash_val << endl;
 }
 
+
+/*
+Malicious Peer - Mines block only if the function is called by the ringmaster of overlay network
+                and add it to blockQueue to simulate interarrival time
+NOTE - ringmaster will utilise the hash power of all malicious nodes
+*/
 void MaliciousPeer::generateBlock()
 {
+    if (malNet->stop)
+        return;
     if (malNet->ringmasterID != peerID)
         return;
     int num_txns = 0;
     vector<string> txns;
-    treeNode *parent_node = blockTree.at(malicious_leaf);
+    treeNode *parent_node = blockTree.at(malNet->malicious_leaf);
     string coinbase = construct_coinbase(peerID, txnIDctr++);
     txns.push_back(coinbase);
 
+    map<int, int> balances = parent_node->balances;
+    map<int, int> temp_bals;
+    for (auto it : balances)
+    {
+        temp_bals[it.first] = it.second;
+    }
+    temp_bals[peerID] += 50; // coinbase
     for (string txn : memPool2)
     {
         vector<int> txn_vector = parse_txn(txn);
         int sender_id = txn_vector[1];
+        int receiver_id = txn_vector[2];
         int amt = txn_vector[3];
 
-        if (parent_node->balances[sender_id] >= amt)
+        if (temp_bals[sender_id] < amt)
         {
-            txns.push_back(txn);
-            num_txns++;
+            continue;
         }
+        temp_bals[sender_id] -= amt;
+        temp_bals[receiver_id] += amt;
+
+        txns.push_back(txn);
+        num_txns++;
+
         if (num_txns > 999)
         {
-            cout << "Block ID " << blkIDctr << " fully filled" << endl;
             break;
         }
     }
 
-    Block *blk = new Block(blkIDctr++, peerID, malicious_leaf, txns);
-
-    string hash_val = calculateHash(blkIDctr - 1, peerID, malicious_leaf, txns); // calculate hash for this block
+    Block *blk = new Block(blkIDctr++, peerID, malNet->malicious_leaf, txns);
+    string hash_val = calculateHash(blkIDctr - 1, peerID, malNet->malicious_leaf, txns); // calculate hash for this block
     seen_blocks[hash_val] = blk;
     int ts;
     do
     {
-        cout << "exponential sampling: " << I * 1000 / hash_power << endl;
         ts = generateExponential(I * 1000 / hash_power);
+
     } while (curr_time + ts < 0);
 
     malNet->blockQueue.push({{curr_time + ts, peerID}, hash_val});
-    cout << "Block " << blk->BlkID << " generated by MP " << peerID << endl;
-    // cout << "hash value: " << hash_val << endl;
 }
 
+
+/*
+Honest Peer - Pack the block into a string, append all attributes and transactions, in string format, 
+            with a delimiter ("%%") and it to the network's sending queue with simulated latency
+*/
 void HonestPeer::sendBlock(string blk_hash, int rcvr, int net)
 {
     Block *blk = seen_blocks[blk_hash];
     if (!blk)
     {
-        cerr << "Block not seen yet, don't send it stupid" << endl;
         exit(0);
     }
     string message = "%%";
-    int a = blk->BlkID;
-    blk->BlkID = 5;
     message = message + blk_hash + "%%";
-    blk->BlkID = a;
     message = message + to_string(blk->BlkID) + "%%";
     message = message + to_string(blk->miner_id) + "%%";
     message = message + blk->parent_hash + "%%";
@@ -279,8 +345,12 @@ void HonestPeer::sendBlock(string blk_hash, int rcvr, int net)
     }
     int ts = normNet->calculateLatency(peerID, rcvr, 1000);
     normNet->sendingQueue.push({{curr_time + ts, 1, peerID, rcvr}, message});
-    cout << "Block " << blk->BlkID << " sent to " << rcvr << " by HP " << peerID << "in normNet" << endl;
 }
+
+/*
+Malicious Peer - Pack the block into a string, append all attributes and transactions, in string format, 
+            with a delimiter ("%%") and it to the network's sending queue with simulated latency
+*/
 
 void MaliciousPeer::sendBlock(string blk_hash, int rcvr, int net)
 {
@@ -298,13 +368,11 @@ void MaliciousPeer::sendBlock(string blk_hash, int rcvr, int net)
     {
         int ts = normNet->calculateLatency(peerID, rcvr, 1000);
         normNet->sendingQueue.push({{curr_time + ts, 1, peerID, rcvr}, message});
-        cout << "Block " << blk->BlkID << " sent to " << rcvr << " by MP " << peerID << "in normNet" << endl;
     }
     else
     {
         int ts = malNet->calculateLatency(peerID, rcvr, 1000); // is it correct?
         malNet->sendingQueue.push({{curr_time + ts, 1, peerID, rcvr}, message});
-        cout << "Block " << blk->BlkID << " sent to " << rcvr << " by MP " << peerID << "in malNet" << endl;
     }
 }
 
@@ -313,16 +381,6 @@ double calculateBlockSize(Block *blk)
 {
     return (1 + blk->txns.size()) * 8.0;
 }
-
-/*
-A member function of Peer class
-Mine blocks
-            - add valid transactions (for which the sender has sufficient balance)
-            - parent id
-
-Adds the mined block to a queue which is used to simulate the interarrival delay of blocks,
-and to verify the validity of mined blocks
-*/
 
 /*
 Called on receiving a block
@@ -336,10 +394,10 @@ Broadcasts the received block to its neighbors
 
 void HonestPeer::receiveBlock(int sender_id, string block)
 {
-    int idx = 2;
-    while (block[idx] != '%')
-        idx++;
-    string hash_val = block.substr(2, idx - 2);
+    pair<string, Block *> block_pair = parse_block(block);
+    string hash_val = block_pair.first;
+    Block *block_ptr = block_pair.second;
+
     if (seen_blocks.find(hash_val) != seen_blocks.end())
     {
         return; // block already received
@@ -349,38 +407,10 @@ void HonestPeer::receiveBlock(int sender_id, string block)
         pending_requests.erase(hash_val);
     if (timeouts.find(hash_val) != timeouts.end())
         timeouts.erase(hash_val);
-    idx = idx + 2;
-    int idx1 = idx;
-    while (block[idx] != '%')
-        idx++;
-    int blk_id = stoi(block.substr(idx1, idx - idx1));
-    idx = idx + 2;
-    idx1 = idx;
-    while (block[idx] != '%')
-        idx++;
-    int miner_id = stoi(block.substr(idx1, idx - idx1));
-    idx = idx + 2;
-    idx1 = idx;
-    while (block[idx] != '%')
-        idx++;
-    string parent_hash = block.substr(idx1, idx - idx1);
-    idx = idx + 2;
-    idx1 = idx;
-    vector<string> transactions;
-    cout << block << endl;
-    while (idx < block.length())
-    {
-        while (block[idx] != '%')
-            idx++;
-        string txn = block.substr(idx1, idx - idx1);
-        idx = idx + 2;
-        idx1 = idx;
-        transactions.push_back(txn);
-        cout << "LLLLLLLL" << txn << endl;
-    }
-    Block *block_ptr = new Block(blk_id, miner_id, parent_hash, transactions);
 
-    cout << "Block " << block_ptr->BlkID << " received from " << sender_id << " by HP " << peerID << endl;
+    int blk_id = block_ptr->BlkID;
+    string parent_hash = block_ptr->parent_hash;
+    vector<string> transactions = block_ptr->txns;
     seen_blocks[hash_val] = block_ptr;
 
     if (blockTree.find(parent_hash) != blockTree.end())
@@ -391,11 +421,10 @@ void HonestPeer::receiveBlock(int sender_id, string block)
         map<int, int> balances_temp;
         if (validateBlock(block_ptr, balances_temp))
         {
-            valid_timeline[arrivalTime].push_back({blk_id, parent_id});
+            valid_timeline[arrivalTime].push_back({blk_id, parent_id, 0});
             treeNode *parentNode = blockTree.at(parent_hash);
             treeNode *child = new treeNode(parentNode, blk_id, peerID);
             child->hash = hash_val;
-            cout << child << " " << hash_val << " tree node" << peerID << endl;
             child->balances = balances_temp;
             blockTree[hash_val] = child;
             leafBlocks.erase(parent_hash);
@@ -411,12 +440,8 @@ void HonestPeer::receiveBlock(int sender_id, string block)
                 {
                     memPool.erase(txn);
                 }
-                broadcastHash(hash_val);
+                broadcastHash(hash_val, 0);
                 generateBlock();
-            }
-            else
-            {
-                // simulator->forks++;
             }
 
             processOrphanBlocks(hash_val);
@@ -428,50 +453,36 @@ void HonestPeer::receiveBlock(int sender_id, string block)
     }
 }
 
+/*
+Malicious Peer - Called on receiving a block
+                Validates the block, adds it to the tree, removes the seen transactions from the pool if
+                the block is a part of the new (or already existing) longest blockchain
+                If the received block's parent is not found, adds it to the orphan blocks' list to verify later
+                Checks if the block is the parent of an orphan block
+                Starts mining on the new longest chain leaf block immediately
+                Broadcasts the received block to its neighbors
+
+NOTE - Check if any of the condition of releasing chain is met. If yes, release the chain
+*/
 void MaliciousPeer::receiveBlock(int sender_id, string block)
 {
-    int idx = 2;
-    while (block[idx] != '%')
-        idx++;
-    string hash_val = block.substr(2, idx - 2);
+    pair<string, Block *> block_pair = parse_block(block);
+    string hash_val = block_pair.first;
+    Block *block_ptr = block_pair.second;
+
     if (seen_blocks.find(hash_val) != seen_blocks.end())
     {
         return; // block already received
     }
+
     if (pending_requests.find(hash_val) != pending_requests.end())
         pending_requests.erase(hash_val);
     if (timeouts.find(hash_val) != timeouts.end())
         timeouts.erase(hash_val);
-    idx = idx + 2;
-    int idx1 = idx;
-    while (block[idx] != '%')
-        idx++;
-    int blk_id = stoi(block.substr(idx1, idx - idx1));
-    idx = idx + 2;
-    idx1 = idx;
-    while (block[idx] != '%')
-        idx++;
-    int miner_id = stoi(block.substr(idx1, idx - idx1));
-    idx = idx + 2;
-    idx1 = idx;
-    while (block[idx] != '%')
-        idx++;
-    string parent_hash = block.substr(idx1, idx - idx1);
-    idx = idx + 2;
-    idx1 = idx;
-    vector<string> transactions;
-    while (idx < block.length())
-    {
-        while (block[idx] != '%')
-            idx++;
-        string txn = block.substr(idx1, idx - idx1);
-        idx = idx + 2;
-        idx1 = idx;
-        transactions.push_back(txn);
-    }
 
-    Block *block_ptr = new Block(blk_id, miner_id, parent_hash, transactions);
-    cout << "Block " << block_ptr->BlkID << " received from " << sender_id << " by MP " << peerID << endl;
+    int blk_id = block_ptr->BlkID;
+    string parent_hash = block_ptr->parent_hash;
+    vector<string> transactions = block_ptr->txns;
     seen_blocks[hash_val] = block_ptr;
 
     if (blockTree.find(parent_hash) != blockTree.end())
@@ -482,16 +493,30 @@ void MaliciousPeer::receiveBlock(int sender_id, string block)
         map<int, int> balances_temp;
         if (validateBlock(block_ptr, balances_temp))
         {
-            cout << "Block added to tree" << endl;
-            valid_timeline[arrivalTime].push_back({blk_id, parent_id});
+
+            if (block_ptr->miner_id == malNet->ringmasterID)
+            {
+                
+                valid_timeline[arrivalTime].push_back({blk_id, parent_id, 1});
+            }
+            else
+            {
+                valid_timeline[arrivalTime].push_back({blk_id, parent_id, 0});
+            }
             treeNode *parentNode = blockTree.at(parent_hash);
             treeNode *child = new treeNode(parentNode, blk_id, peerID);
             child->hash = hash_val;
-            cout << child << " " << hash_val << " tree node" << peerID << endl;
             child->balances = balances_temp;
+            if (hash_val == malNet->attack_root)
+            {
+                longestMalChain = hash_val;
+                longestChain = hash_val;
+            }
             blockTree[hash_val] = child;
             if (malNet->malicious_peers.find(block_ptr->miner_id) == malNet->malicious_peers.end())
+            // miner was honest
             {
+                broadcastHash(hash_val, 0);
                 leafBlocks.erase(parent_hash);
                 leafBlocks.insert(hash_val);
                 if (child->depth > maxDepth)
@@ -500,23 +525,41 @@ void MaliciousPeer::receiveBlock(int sender_id, string block)
                     maxDepth = child->depth;
                     longestChain = hash_val;
 
+                    if (peerID == malNet->ringmasterID)
+                    {
+                        if (maxDepth == malNet->malicious_len || maxDepth == malNet->malicious_len - 1)
+                        {
+                            startReleasingChain();
+                        }
+                        else if (maxDepth > malNet->malicious_len)
+                        {
+                            malNet->attack_root = longestChain;
+                            malNet->malicious_len = 0;
+                            malNet->malicious_leaf = longestChain;
+
+                            for (auto malPeerID : malNet->malicious_peers)
+                            {
+                                if (malNet->peers[malPeerID]->blockTree.find(longestChain) != malNet->peers[malPeerID]->blockTree.end())
+                                {
+                                    malNet->peers[malPeerID]->longestMalChain = longestChain;
+                                    malNet->peers[malPeerID]->longestChain = longestChain;
+                                }
+                            }
+                        }
+                    }
                     for (string txn : transactions)
                     {
                         memPool.erase(txn);
                     }
-                    broadcastHash(hash_val);
                     generateBlock();
-                }
-                else
-                {
-                    // simulator->forks++;
                 }
                 processOrphanBlocks(hash_val);
             }
             else
             {
-                malicious_leaf = hash_val;
-                malicious_len++;
+                broadcastHash(hash_val, 1);
+                longestMalChain = hash_val;
+                processOrphanBlocks(hash_val);
             }
         }
     }
@@ -530,7 +573,7 @@ void MaliciousPeer::receiveBlock(int sender_id, string block)
 Given a block, checks is any of the orphan block's are children of this block, if yes
 process accordingly
 */
-void Peer::processOrphanBlocks(string hash_val)
+void HonestPeer::processOrphanBlocks(string hash_val)
 {
     Block *block = seen_blocks[hash_val];
     vector<string> toRemove;
@@ -542,11 +585,9 @@ void Peer::processOrphanBlocks(string hash_val)
             map<int, int> balances_temp;
             if (validateBlock(seen_blocks[orphan], balances_temp))
             {
-                valid_timeline[curr_time].push_back({seen_blocks[orphan]->BlkID, block->BlkID});
+                valid_timeline[curr_time].push_back({seen_blocks[orphan]->BlkID, block->BlkID, block->miner_id, 0});
                 treeNode *parentNode = blockTree.at(hash_val);
                 treeNode *orphanChild = new treeNode(parentNode, seen_blocks[orphan]->BlkID, peerID);
-                cout << "called orphan blocks yay" << endl;
-                cout << orphanChild << " " << orphan << " tree node" << peerID << endl;
                 orphanChild->hash = orphan;
                 orphanChild->balances = balances_temp;
                 blockTree[orphan] = orphanChild;
@@ -562,7 +603,7 @@ void Peer::processOrphanBlocks(string hash_val)
                         memPool.erase(txn);
                     }
                 }
-                broadcastHash(orphan);
+                broadcastHash(orphan, 0);
                 generateBlock();
                 toRemove.push_back(orphan);
 
@@ -574,7 +615,104 @@ void Peer::processOrphanBlocks(string hash_val)
     {
         orphanBlocks.erase(orphan);
     }
-    cout << "Orphan blocks processed for" << hash_val << endl;
+}
+
+/*
+Given a block, checks is any of the orphan block's are children of this block, if yes
+process accordingly
+*/
+void MaliciousPeer::processOrphanBlocks(string hash_val)
+{
+    Block *block = seen_blocks[hash_val];
+    vector<string> toRemove;
+
+    for (string orphan : orphanBlocks)
+    {
+        if (seen_blocks[orphan]->parent_hash == hash_val)
+        {
+            map<int, int> balances_temp;
+            if (validateBlock(seen_blocks[orphan], balances_temp))
+            {
+                if (seen_blocks[orphan]->miner_id == malNet->ringmasterID)
+                {
+                    
+                    valid_timeline[curr_time].push_back({seen_blocks[orphan]->BlkID, block->BlkID, block->miner_id, 1});
+                }
+                else
+                {
+
+                    valid_timeline[curr_time].push_back({seen_blocks[orphan]->BlkID, block->BlkID, block->miner_id, 0});
+                }
+                treeNode *parentNode = blockTree.at(hash_val);
+                treeNode *orphanChild = new treeNode(parentNode, seen_blocks[orphan]->BlkID, peerID);
+                orphanChild->hash = orphan;
+                orphanChild->balances = balances_temp;
+                if (orphan == malNet->attack_root)
+                {
+                    longestMalChain = orphan;
+                    longestChain = orphan;
+                }
+                blockTree[orphan] = orphanChild;
+
+                if (malNet->malicious_peers.find(seen_blocks[orphan]->miner_id) == malNet->malicious_peers.end())
+                // miner was honest
+                {
+
+                    leafBlocks.erase(hash_val);
+                    leafBlocks.insert(orphan);
+                    if (orphanChild->depth > maxDepth)
+                    {
+                        maxDepth = orphanChild->depth;
+                        longestChain = orphan;
+
+                        if (peerID == malNet->ringmasterID)
+                        {
+                            if (maxDepth == malNet->malicious_len || maxDepth == malNet->malicious_len - 1)
+                            {
+                                startReleasingChain();
+                            }
+                            else if (maxDepth > malNet->malicious_len)
+                            {
+                                malNet->attack_root = longestChain;
+                                malNet->malicious_len = 0;
+                                malNet->malicious_leaf = longestChain;
+
+                                for (auto malPeerID : malNet->malicious_peers)
+                                {
+                                    if (malNet->peers[malPeerID]->blockTree.find(longestChain) != malNet->peers[malPeerID]->blockTree.end())
+                                    {
+                                        malNet->peers[malPeerID]->longestMalChain = longestChain;
+                                        malNet->peers[malPeerID]->longestChain = longestChain;
+                                    }
+                                }
+                            }
+                        }
+
+                        for (string txn : seen_blocks[orphan]->txns)
+                        {
+                            memPool.erase(txn);
+                        }
+                    }
+                    (orphan, 0);
+                    generateBlock();
+                    processOrphanBlocks(orphan);
+                }
+
+                else
+                // ringmaster
+                {
+                    broadcastHash(orphan, 1);
+                    longestMalChain = orphan;
+                    processOrphanBlocks(orphan);
+                }
+            }
+            toRemove.push_back(orphan);
+        }
+    }
+    for (string orphan : toRemove)
+    {
+        orphanBlocks.erase(orphan);
+    }
 }
 
 /*
@@ -582,18 +720,10 @@ Validates the blocks -> checks if the sender of every transaction included has s
 */
 bool Peer::validateBlock(Block *block, map<int, int> &balances_temp)
 {
-    cout << "validating block " << block->BlkID << endl;
     treeNode *parent = blockTree.at(block->parent_hash);
     map<int, int> balances = parent->balances;
 
-    cout << "no of txns" << block->txns.size() << endl;
     int ctr = 0;
-
-    cout << "balances before block validation" << endl;
-    for (auto it : balances)
-    {
-        cout << it.first << " " << it.second << endl;
-    }
 
     for (auto txn : block->txns)
     {
@@ -602,26 +732,21 @@ bool Peer::validateBlock(Block *block, map<int, int> &balances_temp)
         if (txn_vec[1] == -1)
         {
             balances[txn_vec[2]] += 50;
-            cout << "coinbase" << endl;
             continue;
         }
-        cout << "transaction" << txn << endl;
         if (balances[txn_vec[1]] >= txn_vec[3])
         {
-            cout << "txn " << ctr << " OK" << endl;
             balances[txn_vec[1]] -= txn_vec[3];
             balances[txn_vec[2]] += txn_vec[3];
         }
         else
         {
-            cout << "txn " << ctr << " BADBAD" << endl;
             return false;
         }
         ctr++;
     }
     balances[block->miner_id] += 50;
     balances_temp = balances;
-    cout << "Block " << block->BlkID << " validated" << endl;
     return true;
 }
 
@@ -663,15 +788,15 @@ void Peer::writeBlockTimesToFile()
             return;
         }
 
-        outFile << "BlockID : Time: Parent BlockID " << endl;
+        outFile << "BlockID : Time : Parent BlockID : Honest/ Malicious " << endl;
         outFile << "---------------------------------" << endl;
-        outFile << "0 : 0 : -1" << endl;
+        outFile << "0 : 0 : -1 : -1" << endl;
 
         for (const auto &entry : valid_timeline)
         {
             for (const auto &id : entry.second)
             {
-                outFile << id.first << " : " << entry.first << " : " << id.second << "\n";
+                outFile << id[0] << " : " << entry.first << " : " << id[1] << " : " << id[2] << "\n";
             }
         }
         outFile.close();
@@ -683,7 +808,6 @@ void HonestPeer::createTree(Block *genesis_block)
 {
     genesis_blk = new treeNode(nullptr, genesis_block->BlkID, peerID);
     string hash_val = calculateHash(0, -1, "parent_of_genesis", {});
-    cout << genesis_blk << " " << hash_val << " tree node" << peerID << endl;
     genesis_blk->hash = hash_val;
     seen_blocks[hash_val] = genesis_block;
     blockTree[hash_val] = genesis_blk;
@@ -696,12 +820,17 @@ void MaliciousPeer::createTree(Block *genesis_block)
     genesis_blk = new treeNode(nullptr, genesis_block->BlkID, peerID);
     string hash_val = calculateHash(0, -1, "parent_of_genesis", {});
     genesis_blk->hash = hash_val;
-    cout << genesis_blk << " " << hash_val << " tree node" << peerID << endl;
     seen_blocks[hash_val] = genesis_block;
     blockTree[hash_val] = genesis_blk;
     longestChain = hash_val;
-    malicious_leaf = hash_val;
+    longestMalChain = hash_val;
+    malNet->malicious_len = 0;
     leafBlocks.insert(hash_val);
+    if (peerID == malNet->ringmasterID)
+    {
+        malNet->attack_root = hash_val;
+        malNet->malicious_leaf = hash_val;
+    }
 }
 
 /* Helper function to determine whether or not to forward a message */
@@ -713,61 +842,58 @@ bool Peer::query(int txn_id)
     return true;
 }
 
-// void Peer::treeAnalysis()
-// {
-//     map<int, bool> inBlockChain;
-//     string block_hash = longestChain;
-//     while (blkid != 0)
-//     {
-//         inBlockChain[blkid] = true;
-//         blkid = globalBlocks[blkid]->parent_id;
-//     }
-//     inBlockChain[0] = true;
-
-//     vector<int> branch_len;
-//     for (auto leaf : leafBlocks)
-//     {
-//         int len = 0;
-//         while (!inBlockChain[leaf])
-//         {
-//             len++;
-//             leaf = globalBlocks[leaf]->parent_id;
-//         }
-//         branch_len.push_back(len);
-//     }
-// }
-
-int Peer::blocks_in_longest_chain()
+pair<int, int> HonestPeer::blocks_in_longest_chain()
 {
-    int num_blocks = 0;
+    // int num_blocks = 0;
+
+    // // Traverse backwards to find which nodes contributed blocks to the longest chain
+    // treeNode *currNode = blockTree.at(longestChain);
+    // while (currNode->block_id != 0)
+    // {
+    //     string hash = currNode->hash;
+    //     if (seen_blocks[hash]->miner_id == peerID)
+    //     {
+    //         num_blocks++;
+    //     }
+
+    //     currNode = blockTree.at(currNode->parent_hash);
+    // }
+
+    // return num_blocks;
+    return {0,0};
+}
+
+
+pair<int, int> MaliciousPeer::blocks_in_longest_chain()
+{
+    int ringmaster_blocks = 0;
+    int total_blocks = 0;
 
     // Traverse backwards to find which nodes contributed blocks to the longest chain
-    treeNode *currNode = blockTree.at(longestChain);
+    treeNode *currNode = blockTree.at(malNet->malicious_leaf);
     while (currNode->block_id != 0)
     {
         string hash = currNode->hash;
-        if (seen_blocks[hash]->miner_id == peerID)
+        if (seen_blocks[hash]->miner_id == malNet->ringmasterID)
         {
-            num_blocks++;
+            ringmaster_blocks++;
         }
-
+        total_blocks++;
         currNode = blockTree.at(currNode->parent_hash);
     }
 
-    return num_blocks;
+    return {ringmaster_blocks, total_blocks};
 }
 
+/*
+Called by honest peer to add its own mined block to its tree
+*/
 void HonestPeer::addBlocktoTree(string hash_val)
 {
     Block *block = seen_blocks[hash_val];
     treeNode *parentNode = blockTree.at(block->parent_hash);
-    cout << "Parent node: " << parentNode->block_id << endl;
-    cout << "Parent hash: " << parentNode->hash << endl;
     treeNode *child = new treeNode(parentNode, block->BlkID, peerID);
     child->hash = hash_val;
-    cout << child << " " << hash_val << " tree node" << peerID << endl;
-    cout << "Child node: " << child->block_id << endl;
-    cout << "Child hash: " << child->hash << endl;
 
     for (string txn : block->txns)
     {
@@ -794,13 +920,15 @@ void HonestPeer::addBlocktoTree(string hash_val)
     }
 }
 
+/*
+Called by malicious peer to add its own mined block to its tree
+*/
 void MaliciousPeer::addBlocktoTree(string hash_val)
 {
     Block *block = seen_blocks[hash_val];
     treeNode *parentNode = blockTree.at(block->parent_hash);
     treeNode *child = new treeNode(parentNode, block->BlkID, peerID);
     child->hash = hash_val;
-    cout << child << " " << hash_val << " tree node" << peerID << endl;
     for (string txn : block->txns)
     {
         vector<int> txn_vec = parse_txn(txn);
@@ -815,10 +943,98 @@ void MaliciousPeer::addBlocktoTree(string hash_val)
 
     child->balances[peerID] += 50;
     blockTree[hash_val] = child;
-    malicious_len++;
-    malicious_leaf = hash_val;
+    if (peerID == malNet->ringmasterID)
+    {
+        malNet->malicious_len++;
+        malNet->malicious_leaf = hash_val;
+    }
     for (string txn : block->txns)
     {
         memPool2.erase(txn);
+    }
+}
+
+void HonestPeer::releaseChain(string)
+{
+    return;
+}
+
+void HonestPeer::startReleasingChain()
+{
+    return;
+}
+
+/*
+Called by the ringmaster of overlay network to instruct
+malicious peers to start releasing the private chain
+*/
+void MaliciousPeer::startReleasingChain()
+{
+    if (peerID != malNet->ringmasterID)
+        return;
+    string message = "broadcast private chain";
+    double messagesize = 0.064;
+    message += "%" + malNet->attack_root;
+    message += "%" + malNet->malicious_leaf;
+
+    for (auto receiver : malicious_neighbours)
+    {
+        int lt = malNet->calculateLatency(peerID, receiver, messagesize);
+        malNet->sendingQueue.push({{curr_time + lt, 4, peerID, receiver}, message});
+    }
+
+    string curr_mal_leaf = malNet->malicious_leaf;
+    string curr_attack_root = malNet->attack_root;
+
+    string curr_hash = curr_mal_leaf;
+    while (curr_hash != curr_attack_root)
+    {
+        blocks_to_release.insert(curr_hash);
+        broadcastHash(curr_hash, 0);
+        curr_hash = blockTree[curr_hash]->parent_hash;
+    }
+
+    malNet->attack_root = malNet->malicious_leaf;
+    malNet->malicious_len = 0;
+
+    for (auto malPeerID : malNet->malicious_peers)
+    {
+        if (malNet->peers[malPeerID]->seen_blocks.find(malNet->malicious_leaf) != malNet->peers[malPeerID]->seen_blocks.end())
+        {
+            malNet->peers[malPeerID]->longestMalChain = malNet->malicious_leaf;
+            malNet->peers[malPeerID]->longestChain = malNet->malicious_leaf;
+        }
+    }
+}
+
+/*
+Called by the malicious peers to release the private chain onto the original network
+*/
+void MaliciousPeer::releaseChain(string message)
+{
+    pair<string, string> p = extract_root(message);
+    string curr_attack_root = p.first;
+    string curr_mal_leaf = p.second;
+
+    if (released_chains.find(curr_attack_root) != released_chains.end())
+    {
+        return;
+    }
+    released_chains.insert(curr_attack_root);
+
+    double messagesize = 0.064;
+    for (auto receiver : malicious_neighbours)
+    {
+
+        int lt = malNet->calculateLatency(peerID, receiver, messagesize);
+        malNet->sendingQueue.push({{curr_time + lt, 4, peerID, receiver}, message});
+    }
+
+    string curr_hash = curr_mal_leaf;
+    while (curr_hash != curr_attack_root)
+    {
+        blocks_to_release.insert(curr_hash);
+        broadcastHash(curr_hash, 0);
+        curr_hash = blockTree[curr_hash]->parent_hash;
     }
 }

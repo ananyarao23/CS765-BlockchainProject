@@ -12,7 +12,6 @@ void generateGraphvizDotFile(const std::string &inputFile, const std::string &ou
         return;
     }
 
-    // Ensure output directories exist
     fs::create_directories(fs::path(outputDotFile).parent_path());
     fs::create_directories(fs::path(outputPngFile).parent_path());
 
@@ -23,8 +22,8 @@ void generateGraphvizDotFile(const std::string &inputFile, const std::string &ou
     }
 
     outFile << "digraph BlockchainTree {\n";
-    outFile << "    rankdir=LR;\n";  // Set horizontal layout
-    outFile << "    node [shape=circle, style=filled, fillcolor=lightgray];\n\n";
+    outFile << "    rankdir=LR;\n";  // Horizontal layout
+    outFile << "    node [shape=circle, style=filled, fontcolor=black];\n\n";
 
     std::string line;
     bool firstLine = true;
@@ -36,17 +35,28 @@ void generateGraphvizDotFile(const std::string &inputFile, const std::string &ou
         }
 
         std::istringstream iss(line);
-        int blockID, time, parentID;
-        char colon1, colon2;
+        int blockID, time, parentID, status;
+        char colon1, colon2, colon3;
 
-        if (!(iss >> blockID >> colon1 >> time >> colon2 >> parentID)) {
+        if (!(iss >> blockID >> colon1 >> time >> colon2 >> parentID >> colon3 >> status)) {
             continue; // Skip malformed lines
         }
 
-        if (parentID == -1) {
-            outFile << "    " << blockID << " [shape=doublecircle, color=red];\n"; // Genesis block
+        std::string color;
+        if (status == 0) {
+            color = "green";  // Honest block
+        } else if (status == 1) {
+            color = "red";    // Malicious block
         } else {
+            color = "green";   // Undefined status
+        }
+
+        outFile << "    " << blockID << " [fillcolor=" << color << "];\n";
+
+        if (parentID != -1) {
             outFile << "    " << parentID << " -> " << blockID << ";\n";
+        } else {
+            outFile << "    " << blockID << " [shape=doublecircle, color=blue];\n"; // Genesis block
         }
     }
 
@@ -54,7 +64,6 @@ void generateGraphvizDotFile(const std::string &inputFile, const std::string &ou
     outFile.close();
     inFile.close();
 
-    // Generate PNG from DOT using Graphviz
     std::string command = "dot -Tpng " + outputDotFile + " -o " + outputPngFile;
     system(command.c_str());
     std::cout << "Generated: " << outputPngFile << std::endl;
